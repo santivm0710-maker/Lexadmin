@@ -1,40 +1,48 @@
-"""Prototipo de conexión a base de datos.
+import mysql.connector
+from mysql.connector import pooling
 
-IMPORTANTE:
-Este archivo NO abre una conexión real.
-Solo deja preparada la estructura para una conexión futura.
-"""
-
-from dataclasses import dataclass
-
-from backend.config import settings
+from config import settings
 
 
-@dataclass
-class DatabaseConnectionPrototype:
-    driver: str
-    host: str
-    port: int
-    database: str
-    user: str
+class DatabaseConnection:
 
-    def get_connection_string_preview(self) -> str:
-        """Retorna una cadena simulada sin mostrar la contraseña."""
-        return f"{self.driver}://{self.user}:***@{self.host}:{self.port}/{self.database}"
-
-    def connect(self):
-        """Método reservado para conexión futura.
-
-        En esta versión prototipo no se realiza conexión real.
-        """
-        raise NotImplementedError("La conexión real a base de datos todavía no está implementada.")
-
-
-def get_database_prototype() -> DatabaseConnectionPrototype:
-    return DatabaseConnectionPrototype(
-        driver=settings.database_driver,
+    _pool = pooling.MySQLConnectionPool(
+        pool_name="lexadmin_pool",
+        pool_size=5,
         host=settings.database_host,
         port=settings.database_port,
-        database=settings.database_name,
         user=settings.database_user,
+        password=settings.database_password,
+        database=settings.database_name,
     )
+
+    @classmethod
+    def connect(cls):
+        """
+        Devuelve una conexión desde el pool.
+        """
+        return cls._pool.get_connection()
+
+    @staticmethod
+    def close(connection):
+        if connection and connection.is_connected():
+            connection.close()
+
+    @staticmethod
+    def test_connection():
+        connection = None
+
+        try:
+            connection = DatabaseConnection.connect()
+
+            if connection.is_connected():
+                print("Conexión exitosa con MySQL.")
+                return True
+
+        except mysql.connector.Error as e:
+            print(f"Error de conexión: {e}")
+            return False
+
+        finally:
+            if connection:
+                connection.close()

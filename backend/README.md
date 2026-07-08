@@ -1,22 +1,22 @@
-# Backend prototipo - LexAdmin
+# Backend - LexAdmin
 
-Esta carpeta contiene la estructura inicial del backend para LexAdmin.
-
-El backend está diseñado como un prototipo, por lo que todavía **no se conecta a una base de datos real**. Su objetivo es dejar preparada la organización del código para una futura conexión con una base de datos y para una posible integración con el frontend.
+Esta carpeta contiene la implementación del backend de **LexAdmin**, desarrollada con **FastAPI**. El proyecto mantiene una arquitectura por capas (entidades, repositorios, servicios y rutas) y actualmente cuenta con una **conexión real a una base de datos MySQL**, dejando preparada la estructura para implementar la persistencia completa de la información.
 
 ## Objetivo
 
 Representar la capa del servidor de LexAdmin, incluyendo:
 
-- Configuración general del backend.
-- Prototipo de conexión a base de datos.
-- Entidades principales del sistema.
-- Repositorios simulados con datos de ejemplo.
-- Servicios por módulo.
-- Rutas API simuladas.
-- Separación de responsabilidades para facilitar futuras mejoras.
+* Configuración general del backend.
+* Conexión a base de datos MySQL.
+* Entidades principales del sistema.
+* Repositorios organizados por módulo.
+* Servicios para la lógica de negocio.
+* Rutas API para cada módulo.
+* Separación de responsabilidades para facilitar el mantenimiento y la escalabilidad.
 
-## Estructura
+---
+
+# Estructura
 
 ```text
 backend/
@@ -26,7 +26,8 @@ backend/
 ├── README.md
 ├── database/
 │   ├── __init__.py
-│   └── connection.py
+│   ├── connection.py
+│   └── lexadmin.sql
 ├── entities/
 │   ├── __init__.py
 │   ├── cliente.py
@@ -66,35 +67,99 @@ backend/
     └── common.py
 ```
 
-## Entidades incluidas
+---
 
-El backend contiene entidades base para los módulos principales del sistema:
+# Arquitectura
 
-- Cliente
-- Caso
-- Expediente
-- Evento de agenda
-- Información judicial
-- Evento de bitácora
+El backend sigue una arquitectura por capas:
 
-Estas entidades están creadas con `dataclass` para representar la estructura de datos del sistema antes de implementar modelos definitivos de base de datos.
-
-## Prototipo de conexión
-
-El archivo `database/connection.py` contiene una clase llamada `DatabaseConnectionPrototype`.
-
-Esta clase solo prepara los datos de conexión, pero no realiza una conexión real.
-
-```python
-def connect(self):
-    raise NotImplementedError("La conexión real a base de datos todavía no está implementada.")
+```text
+Cliente
+    │
+    ▼
+Routes (FastAPI)
+    │
+    ▼
+Services
+    │
+    ▼
+Repositories
+    │
+    ▼
+Database (MySQL)
 ```
 
-Esto permite mostrar que el proyecto está preparado para una conexión futura sin depender todavía de MySQL, PostgreSQL, SQLite u otro motor.
+Cada capa tiene una responsabilidad específica:
 
-## Rutas simuladas
+* **Routes:** reciben las peticiones HTTP.
+* **Services:** contienen la lógica de negocio.
+* **Repositories:** administran el acceso a los datos.
+* **Database:** gestiona la conexión con MySQL.
 
-El backend incluye rutas API para consultar datos de ejemplo:
+---
+
+# Base de datos
+
+El proyecto utiliza **MySQL** como gestor de base de datos.
+
+La estructura de la base de datos se encuentra en:
+
+```text
+backend/database/lexadmin.sql
+```
+
+Este script crea la base de datos **lexadmin** junto con las tablas principales del sistema.
+
+Las tablas implementadas son:
+
+* clientes
+* casos
+* agenda
+* expedientes
+* bitacora
+
+Estas tablas representan las entidades utilizadas actualmente por el prototipo.
+
+---
+
+# Conexión a la base de datos
+
+La conexión se encuentra implementada en:
+
+```text
+backend/database/connection.py
+```
+
+La clase `DatabaseConnection` administra un pool de conexiones mediante `mysql-connector-python`, permitiendo reutilizar conexiones y facilitando futuras operaciones CRUD.
+
+La configuración se obtiene desde `config.py`, donde se definen:
+
+* Host
+* Puerto
+* Nombre de la base de datos
+* Usuario
+* Contraseña
+
+---
+
+# Entidades
+
+El backend incluye las entidades principales del sistema:
+
+* Cliente
+* Caso
+* Expediente
+* Agenda
+* Información judicial
+* Bitácora
+
+Actualmente se utilizan como representación de la información manejada por el sistema y servirán como base para la futura implementación de persistencia completa.
+
+---
+
+# Endpoints disponibles
+
+El backend expone los siguientes endpoints:
 
 ```text
 GET /
@@ -105,28 +170,31 @@ GET /expedientes/
 GET /agenda/
 GET /judicial/
 GET /bitacora/
+GET /dashboard/
+GET /reportes/
 ```
 
-Todas las rutas devuelven información simulada desde listas internas.
+En la versión actual los repositorios continúan utilizando datos simulados, aunque la infraestructura de conexión a MySQL ya se encuentra implementada.
 
-## Instalación
+---
 
-Desde la raíz del proyecto:
+# Instalación
+
+Desde la carpeta del backend:
 
 ```bash
-cd backend
 python -m venv venv
 ```
 
 Activar el entorno virtual.
 
-En Windows:
+Windows:
 
 ```bash
 venv\Scripts\activate
 ```
 
-En macOS o Linux:
+Linux/macOS:
 
 ```bash
 source venv/bin/activate
@@ -138,93 +206,109 @@ Instalar dependencias:
 pip install -r requirements.txt
 ```
 
-## Ejecución
+Instalar el conector de MySQL:
 
-Desde la raíz del proyecto, ejecutar:
+```bash
+pip install mysql-connector-python
+```
+
+---
+
+# Configuración
+
+Modificar los parámetros de conexión en `config.py`:
+
+* database_host
+* database_port
+* database_name
+* database_user
+* database_password
+
+También es posible utilizar un archivo `.env` para definir estas variables.
+
+---
+
+# Crear la base de datos
+
+Antes de ejecutar el proyecto, importar el archivo:
+
+```text
+backend/database/lexadmin.sql
+```
+
+en MySQL Workbench o ejecutar su contenido desde la consola de MySQL.
+
+---
+
+# Ejecutar el backend
+
+Desde la raíz del proyecto:
 
 ```bash
 uvicorn backend.main:app --reload
 ```
 
-Luego abrir en el navegador:
+La documentación automática estará disponible en:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Ahí se puede visualizar la documentación automática de las rutas del backend.
-
-## Estado actual
-
-Incluye:
-
-- Estructura de backend organizada.
-- API prototipo con FastAPI.
-- Entidades principales del sistema.
-- Repositorios simulados.
-- Servicios por módulo.
-- Rutas con datos de ejemplo.
-- Prototipo de configuración de conexión.
-
-No incluye todavía:
-
-- Conexión real a base de datos.
-- Tablas SQL.
-- ORM como SQLAlchemy.
-- Migraciones.
-- Autenticación.
-- Validaciones completas.
-- Integración real con el frontend.
-- Almacenamiento persistente.
-
-## Siguientes pasos sugeridos
-
-Para convertir este prototipo en un backend funcional, se podrían implementar:
-
-1. Base de datos SQLite, PostgreSQL o MySQL.
-2. Modelos ORM con SQLAlchemy.
-3. Migraciones con Alembic.
-4. CRUD completo para cada entidad.
-5. Autenticación de usuarios.
-6. Roles para abogado, asistente y administrador.
-7. Integración con el frontend de CustomTkinter.
-8. Carga real de documentos PDF.
-9. OCR para lectura de expedientes.
-10. Generación de reportes.
-
 ---
 
-## Endpoints conectados al frontend
+# Ejecutar el frontend
 
-El frontend consume de forma prototipo los siguientes endpoints:
-
-```text
-GET /clientes/
-GET /casos/
-GET /expedientes/
-GET /agenda/
-GET /judicial/
-GET /bitacora/
-GET /dashboard/
-GET /reportes/
-GET /conexion
-```
-
-Estos endpoints devuelven datos simulados desde memoria. Todavía no existe conexión real a base de datos.
-
-## Probar con el frontend
-
-Desde la raíz del proyecto, ejecutar:
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-Luego, en otra terminal:
+En otra terminal:
 
 ```bash
 cd frontend
 python main.py
 ```
 
-El archivo `frontend/api_client.py` es el puente entre la interfaz gráfica y la API prototipo.
+El archivo `frontend/api_client.py` actúa como intermediario entre la interfaz gráfica y la API.
+
+---
+
+# Estado actual
+
+Actualmente el proyecto incluye:
+
+* Arquitectura organizada por capas.
+* API desarrollada con FastAPI.
+* Conexión real a MySQL.
+* Pool de conexiones.
+* Script SQL para crear la base de datos.
+* Entidades principales.
+* Servicios.
+* Repositorios.
+* Rutas API.
+* Configuración centralizada.
+
+Actualmente no incluye:
+
+* CRUD conectado a MySQL.
+* Persistencia de información.
+* SQLAlchemy.
+* Migraciones.
+* Autenticación.
+* Gestión de usuarios y roles.
+* Validaciones completas.
+* Carga real de documentos PDF.
+* OCR.
+* Reportes dinámicos.
+
+---
+
+# Próximas mejoras
+
+Las siguientes funcionalidades podrán incorporarse en futuras versiones:
+
+1. Implementar CRUD utilizando MySQL.
+2. Sustituir los datos simulados por consultas reales.
+3. Integrar SQLAlchemy como ORM.
+4. Implementar migraciones con Alembic.
+5. Incorporar autenticación y autorización.
+6. Gestionar carga de documentos PDF.
+7. Implementar OCR para expedientes.
+8. Generar reportes automáticos.
+9. Integrar completamente el frontend con la base de datos.
