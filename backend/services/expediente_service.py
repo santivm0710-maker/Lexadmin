@@ -12,3 +12,9 @@ class ExpedienteService:
 
     def crear(self, datos: ExpedienteCreate) -> Expediente:
         return self.repository.add(Expediente(id_expediente=0, **datos.model_dump()))
+
+    def actualizar(self, id_expediente: int, datos: ExpedienteCreate) -> Expediente | None:
+        return self.repository.update(id_expediente, Expediente(id_expediente=id_expediente, **datos.model_dump()))
+
+    def eliminar(self, id_expediente: int) -> bool:
+        return self.repository.delete(id_expediente)

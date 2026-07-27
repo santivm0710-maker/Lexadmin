@@ -31,7 +31,7 @@ def tarjeta(parent, titulo=None):
     return frame
 
 
-def crear_tabla(parent, columnas, filas, alto=8):
+def crear_tabla(parent, columnas, filas, alto=8, ids=None):
     style = ttk.Style()
     style.theme_use("default")
     style.configure(
@@ -55,8 +55,10 @@ def crear_tabla(parent, columnas, filas, alto=8):
     for columna in columnas:
         tabla.heading(columna, text=columna)
         tabla.column(columna, anchor="w", width=140, stretch=True)
-    for fila in filas:
-        tabla.insert("", "end", values=fila)
+    ids = ids or []
+    for i, fila in enumerate(filas):
+        iid = str(ids[i]) if i < len(ids) else None
+        tabla.insert("", "end", iid=iid, values=fila)
     return tabla
 
 
@@ -80,8 +82,10 @@ def entrada(parent, etiqueta, placeholder):
     return contenedor
 
 
-def actualizar_tabla(tabla, filas):
+def actualizar_tabla(tabla, filas, ids=None):
     for item in tabla.get_children():
         tabla.delete(item)
-    for fila in filas:
-        tabla.insert("", "end", values=fila)
+    ids = ids or []
+    for i, fila in enumerate(filas):
+        iid = str(ids[i]) if i < len(ids) else None
+        tabla.insert("", "end", iid=iid, values=fila)

@@ -60,6 +60,30 @@ def _post(endpoint: str, payload: dict):
         return False, "No se pudo conectar con el backend. Verifica que esté corriendo.", None
 
 
+def _send(endpoint: str, method: str, payload: dict | None = None):
+    """Envía una petición PUT/DELETE al backend. Devuelve (exito, mensaje, data)."""
+    url = f"{API_BASE_URL}{endpoint}"
+    cuerpo = json.dumps(payload).encode("utf-8") if payload is not None else None
+    headers = {"Accept": "application/json"}
+    if cuerpo is not None:
+        headers["Content-Type"] = "application/json"
+    request = Request(url, data=cuerpo, method=method, headers=headers)
+
+    try:
+        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+            respuesta = json.loads(response.read().decode("utf-8"))
+            return True, respuesta.get("message", "Operación exitosa."), respuesta.get("data")
+    except HTTPError as error:
+        try:
+            detalle = json.loads(error.read().decode("utf-8"))
+            mensaje = detalle.get("detail", str(detalle))
+        except (json.JSONDecodeError, OSError):
+            mensaje = f"Error HTTP {error.code}."
+        return False, mensaje, None
+    except (URLError, TimeoutError, OSError):
+        return False, "No se pudo conectar con el backend. Verifica que esté corriendo.", None
+
+
 def backend_disponible() -> bool:
     return _get("/conexion") is not None
 
@@ -276,6 +300,118 @@ def crear_info_judicial(id_caso, juzgado, juez=None, fiscal=None, contacto_insti
             "contacto_institucional": contacto_institucional or None,
         },
     )
+
+
+def actualizar_cliente(id_cliente, nombre, cedula, telefono="", correo="", caso_relacionado=None):
+    return _send(
+        f"/clientes/{id_cliente}",
+        "PUT",
+        {
+            "nombre": nombre,
+            "cedula": cedula,
+            "telefono": telefono or None,
+            "correo": correo or None,
+            "caso_relacionado": caso_relacionado,
+        },
+    )
+
+
+def eliminar_cliente(id_cliente):
+    return _send(f"/clientes/{id_cliente}", "DELETE")
+
+
+def actualizar_caso(id_caso, numero_expediente, id_cliente, tipo_caso, estado, prioridad, abogado_responsable=None):
+    return _send(
+        f"/casos/{id_caso}",
+        "PUT",
+        {
+            "numero_expediente": numero_expediente,
+            "id_cliente": id_cliente,
+            "tipo_caso": tipo_caso,
+            "estado": estado,
+            "prioridad": prioridad,
+            "abogado_responsable": abogado_responsable or None,
+        },
+    )
+
+
+def eliminar_caso(id_caso):
+    return _send(f"/casos/{id_caso}", "DELETE")
+
+
+def actualizar_expediente(id_expediente, id_caso, nombre_documento, tipo_documento, ruta_archivo=None, estado_ocr="Pendiente"):
+    return _send(
+        f"/expedientes/{id_expediente}",
+        "PUT",
+        {
+            "id_caso": id_caso,
+            "nombre_documento": nombre_documento,
+            "tipo_documento": tipo_documento,
+            "ruta_archivo": ruta_archivo or None,
+            "estado_ocr": estado_ocr,
+        },
+    )
+
+
+def eliminar_expediente(id_expediente):
+    return _send(f"/expedientes/{id_expediente}", "DELETE")
+
+
+def actualizar_evento_agenda(id_evento, id_caso, fecha, hora, actividad, lugar, prioridad):
+    return _send(
+        f"/agenda/{id_evento}",
+        "PUT",
+        {
+            "id_caso": id_caso,
+            "fecha": fecha,
+            "hora": hora,
+            "actividad": actividad,
+            "lugar": lugar,
+            "prioridad": prioridad,
+        },
+    )
+
+
+def eliminar_evento_agenda(id_evento):
+    return _send(f"/agenda/{id_evento}", "DELETE")
+
+
+def actualizar_info_judicial(id_info_judicial, id_caso, juzgado, juez=None, fiscal=None, contacto_institucional=None):
+    return _send(
+        f"/judicial/{id_info_judicial}",
+        "PUT",
+        {
+            "id_caso": id_caso,
+            "juzgado": juzgado,
+            "juez": juez or None,
+            "fiscal": fiscal or None,
+            "contacto_institucional": contacto_institucional or None,
+        },
+    )
+
+
+def eliminar_info_judicial(id_info_judicial):
+    return _send(f"/judicial/{id_info_judicial}", "DELETE")
+
+
+def obtener_clientes_raw():
+    return _get("/clientes/") or []
+
+
+def obtener_casos_raw():
+    return _get("/casos/") or []
+
+
+def obtener_expedientes_raw():
+    return _get("/expedientes/") or []
+
+
+def obtener_agenda_raw():
+    return _get("/agenda/") or []
+
+
+def obtener_judicial_raw():
+    return _get("/judicial/") or []
 
 
 def buscar_id_cliente_por_nombre(nombre: str):

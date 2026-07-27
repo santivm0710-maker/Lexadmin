@@ -6,8 +6,10 @@ Ejecutar desde la raíz del proyecto con:
 Este backend expone rutas simuladas y no se conecta a una base de datos real.
 """
 
-from fastapi import FastAPI
+import mysql.connector
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from backend.config import settings
 from backend.database.connection import get_database_prototype
@@ -32,6 +34,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+MYSQL_ERROR_RESPONSES = {
+    1062: (409, "Ya existe un registro con ese valor único (dato duplicado)."),
+    1451: (409, "No se puede eliminar: existen registros relacionados que dependen de este."),
+    1452: (400, "El registro relacionado (cliente/caso) no existe."),
+}
+
+
+@app.exception_handler(mysql.connector.Error)
+async def mysql_error_handler(request: Request, exc: mysql.connector.Error):
+    status_code, detail = MYSQL_ERROR_RESPONSES.get(exc.errno, (500, "Error de base de datos."))
+    return JSONResponse(status_code=status_code, content={"detail": detail})
 
 app.include_router(clientes_router)
 app.include_router(casos_router)

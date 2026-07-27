@@ -12,3 +12,9 @@ class ClienteService:
 
     def crear(self, datos: ClienteCreate) -> Cliente:
         return self.repository.add(Cliente(id_cliente=0, **datos.model_dump()))
+
+    def actualizar(self, id_cliente: int, datos: ClienteCreate) -> Cliente | None:
+        return self.repository.update(id_cliente, Cliente(id_cliente=id_cliente, **datos.model_dump()))
+
+    def eliminar(self, id_cliente: int) -> bool:
+        return self.repository.delete(id_cliente)

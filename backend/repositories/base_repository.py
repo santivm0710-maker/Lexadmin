@@ -44,3 +44,55 @@ class BaseRepository(Generic[T]):
             return dataclasses.replace(item, **{self.pk_field: new_id})
         finally:
             DatabaseConnection.close(connection)
+
+    def get_by_id(self, item_id) -> T | None:
+        connection = DatabaseConnection.connect()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                f"SELECT * FROM {self.table_name} WHERE {self.pk_field} = %s",
+                (item_id,),
+            )
+            row = cursor.fetchone()
+            cursor.close()
+            return self.entity_class(**row) if row else None
+        finally:
+            DatabaseConnection.close(connection)
+
+    def update(self, item_id, item: T) -> T | None:
+        if self.get_by_id(item_id) is None:
+            return None
+
+        data = dataclasses.asdict(item)
+        data.pop(self.pk_field, None)
+        columns = list(data.keys())
+        set_clause = ", ".join([f"{column} = %s" for column in columns])
+        values = [data[column] for column in columns] + [item_id]
+
+        connection = DatabaseConnection.connect()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                f"UPDATE {self.table_name} SET {set_clause} WHERE {self.pk_field} = %s",
+                values,
+            )
+            connection.commit()
+            cursor.close()
+            return dataclasses.replace(item, **{self.pk_field: item_id})
+        finally:
+            DatabaseConnection.close(connection)
+
+    def delete(self, item_id) -> bool:
+        connection = DatabaseConnection.connect()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                f"DELETE FROM {self.table_name} WHERE {self.pk_field} = %s",
+                (item_id,),
+            )
+            connection.commit()
+            eliminado = cursor.rowcount > 0
+            cursor.close()
+            return eliminado
+        finally:
+            DatabaseConnection.close(connection)

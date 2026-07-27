@@ -12,3 +12,9 @@ class CasoService:
 
     def crear(self, datos: CasoCreate) -> Caso:
         return self.repository.add(Caso(id_caso=0, **datos.model_dump()))
+
+    def actualizar(self, id_caso: int, datos: CasoCreate) -> Caso | None:
+        return self.repository.update(id_caso, Caso(id_caso=id_caso, **datos.model_dump()))
+
+    def eliminar(self, id_caso: int) -> bool:
+        return self.repository.delete(id_caso)
