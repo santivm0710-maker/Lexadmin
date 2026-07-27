@@ -34,6 +34,32 @@ def _get(endpoint: str):
         return None
 
 
+def _post(endpoint: str, payload: dict):
+    """Envía datos a un endpoint del backend. Devuelve (exito, mensaje, data)."""
+    url = f"{API_BASE_URL}{endpoint}"
+    cuerpo = json.dumps(payload).encode("utf-8")
+    request = Request(
+        url,
+        data=cuerpo,
+        method="POST",
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+    )
+
+    try:
+        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+            respuesta = json.loads(response.read().decode("utf-8"))
+            return True, respuesta.get("message", "Operación exitosa."), respuesta.get("data")
+    except HTTPError as error:
+        try:
+            detalle = json.loads(error.read().decode("utf-8"))
+            mensaje = detalle.get("detail", str(detalle))
+        except (json.JSONDecodeError, OSError):
+            mensaje = f"Error HTTP {error.code}."
+        return False, mensaje, None
+    except (URLError, TimeoutError, OSError):
+        return False, "No se pudo conectar con el backend. Verifica que esté corriendo.", None
+
+
 def backend_disponible() -> bool:
     return _get("/conexion") is not None
 
@@ -59,12 +85,13 @@ def obtener_casos():
     if data is None:
         return fallback_data.CASOS
 
-    clientes = {item[4]: item[0] for item in obtener_clientes()}
+    clientes = _get("/clientes/") or []
+    nombres_por_id = {item.get("id_cliente"): item.get("nombre", "") for item in clientes}
     return [
         (
             item.get("numero_expediente", ""),
-            clientes.get(f"Caso {item.get('numero_expediente', '')}", f"Cliente ID {item.get('id_cliente', '')}"),
-            item.get("tipo_proceso", ""),
+            nombres_por_id.get(item.get("id_cliente"), f"Cliente ID {item.get('id_cliente', '')}"),
+            item.get("tipo_caso", ""),
             item.get("estado", ""),
             item.get("prioridad", ""),
             item.get("abogado_responsable", ""),
@@ -84,7 +111,7 @@ def obtener_expedientes():
         (
             f"Caso ID {item.get('id_caso', '')}",
             casos_por_id.get(item.get("id_caso"), ""),
-            item.get("nombre_archivo", ""),
+            item.get("nombre_documento", ""),
             item.get("tipo_documento", ""),
             item.get("estado_ocr", ""),
             "Cliente/Caso/Documento",
@@ -182,6 +209,94 @@ def obtener_indicadores_reportes():
     if data is None:
         return None
     return [tuple(item) for item in data.get("indicadores", [])]
+
+
+def crear_cliente(nombre, cedula, telefono="", correo="", caso_relacionado=None):
+    return _post(
+        "/clientes/",
+        {
+            "nombre": nombre,
+            "cedula": cedula,
+            "telefono": telefono or None,
+            "correo": correo or None,
+            "caso_relacionado": caso_relacionado,
+        },
+    )
+
+
+def crear_caso(numero_expediente, id_cliente, tipo_caso, estado, prioridad, abogado_responsable=None):
+    return _post(
+        "/casos/",
+        {
+            "numero_expediente": numero_expediente,
+            "id_cliente": id_cliente,
+            "tipo_caso": tipo_caso,
+            "estado": estado,
+            "prioridad": prioridad,
+            "abogado_responsable": abogado_responsable or None,
+        },
+    )
+
+
+def crear_expediente(id_caso, nombre_documento, tipo_documento, ruta_archivo=None, estado_ocr="Pendiente"):
+    return _post(
+        "/expedientes/",
+        {
+            "id_caso": id_caso,
+            "nombre_documento": nombre_documento,
+            "tipo_documento": tipo_documento,
+            "ruta_archivo": ruta_archivo or None,
+            "estado_ocr": estado_ocr,
+        },
+    )
+
+
+def crear_evento_agenda(id_caso, fecha, hora, actividad, lugar, prioridad):
+    return _post(
+        "/agenda/",
+        {
+            "id_caso": id_caso,
+            "fecha": fecha,
+            "hora": hora,
+            "actividad": actividad,
+            "lugar": lugar,
+            "prioridad": prioridad,
+        },
+    )
+
+
+def crear_info_judicial(id_caso, juzgado, juez=None, fiscal=None, contacto_institucional=None):
+    return _post(
+        "/judicial/",
+        {
+            "id_caso": id_caso,
+            "juzgado": juzgado,
+            "juez": juez or None,
+            "fiscal": fiscal or None,
+            "contacto_institucional": contacto_institucional or None,
+        },
+    )
+
+
+def buscar_id_cliente_por_nombre(nombre: str):
+    data = _get("/clientes/") or []
+    nombre = nombre.strip().lower()
+    for item in data:
+        if item.get("nombre", "").strip().lower() == nombre:
+            return item.get("id_cliente")
+    return None
+
+
+def buscar_id_caso_por_expediente(numero_expediente: str):
+    data = _get("/casos/") or []
+    numero_expediente = numero_expediente.strip()
+    if numero_expediente and not numero_expediente.startswith("#"):
+        numero_expediente = f"#{numero_expediente}"
+    numero_expediente = numero_expediente.lower()
+    for item in data:
+        if item.get("numero_expediente", "").strip().lower() == numero_expediente:
+            return item.get("id_caso")
+    return None
 
 
 def _formatear_fecha_hora(valor: str) -> str:

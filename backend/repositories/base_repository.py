@@ -1,21 +1,46 @@
-"""Repositorio base prototipo.
+"""Repositorio base con persistencia real en MySQL."""
 
-La intención de esta capa es aislar el acceso a datos.
-Por ahora usa listas de ejemplo y NO base de datos.
-"""
+import dataclasses
+from typing import Generic, Type, TypeVar
 
-from typing import Generic, Iterable, List, TypeVar
+from backend.database.connection import DatabaseConnection
 
 T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
-    def __init__(self, initial_data: Iterable[T] | None = None):
-        self._items: List[T] = list(initial_data or [])
+    table_name: str = ""
+    entity_class: Type[T] = None
+    pk_field: str = ""
 
     def list_all(self) -> list[T]:
-        return self._items
+        connection = DatabaseConnection.connect()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(f"SELECT * FROM {self.table_name}")
+            rows = cursor.fetchall()
+            cursor.close()
+            return [self.entity_class(**row) for row in rows]
+        finally:
+            DatabaseConnection.close(connection)
 
     def add(self, item: T) -> T:
-        self._items.append(item)
-        return item
+        data = dataclasses.asdict(item)
+        data.pop(self.pk_field, None)
+        columns = list(data.keys())
+        placeholders = ", ".join(["%s"] * len(columns))
+        values = [data[column] for column in columns]
+
+        connection = DatabaseConnection.connect()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                f"INSERT INTO {self.table_name} ({', '.join(columns)}) VALUES ({placeholders})",
+                values,
+            )
+            connection.commit()
+            new_id = cursor.lastrowid
+            cursor.close()
+            return dataclasses.replace(item, **{self.pk_field: new_id})
+        finally:
+            DatabaseConnection.close(connection)

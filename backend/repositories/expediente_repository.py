@@ -1,7 +1,8 @@
+from backend.entities import Expediente
 from backend.repositories.base_repository import BaseRepository
-from backend.repositories.mock_data import EXPEDIENTES
 
 
-class ExpedienteRepository(BaseRepository):
-    def __init__(self):
-        super().__init__(EXPEDIENTES)
+class ExpedienteRepository(BaseRepository[Expediente]):
+    table_name = "expedientes"
+    entity_class = Expediente
+    pk_field = "id_expediente"

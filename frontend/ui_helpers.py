@@ -68,11 +68,20 @@ def entrada(parent, etiqueta, placeholder):
         font=ctk.CTkFont(size=12, weight="bold"),
         text_color=TEXT,
     ).pack(anchor="w", pady=(0, 5))
-    ctk.CTkEntry(
+    campo = ctk.CTkEntry(
         contenedor,
         placeholder_text=placeholder,
         height=38,
         fg_color="white",
         border_color=BORDER,
-    ).pack(fill="x")
+    )
+    campo.pack(fill="x")
+    contenedor.entry = campo
     return contenedor
+
+
+def actualizar_tabla(tabla, filas):
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for fila in filas:
+        tabla.insert("", "end", values=fila)

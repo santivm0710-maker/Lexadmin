@@ -1,7 +1,8 @@
+from backend.entities import InformacionJudicial
 from backend.repositories.base_repository import BaseRepository
-from backend.repositories.mock_data import INFO_JUDICIAL
 
 
-class JudicialRepository(BaseRepository):
-    def __init__(self):
-        super().__init__(INFO_JUDICIAL)
+class JudicialRepository(BaseRepository[InformacionJudicial]):
+    table_name = "informacion_judicial"
+    entity_class = InformacionJudicial
+    pk_field = "id_info_judicial"

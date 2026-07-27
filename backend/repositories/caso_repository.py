@@ -1,7 +1,8 @@
+from backend.entities import Caso
 from backend.repositories.base_repository import BaseRepository
-from backend.repositories.mock_data import CASOS
 
 
-class CasoRepository(BaseRepository):
-    def __init__(self):
-        super().__init__(CASOS)
+class CasoRepository(BaseRepository[Caso]):
+    table_name = "casos"
+    entity_class = Caso
+    pk_field = "id_caso"
