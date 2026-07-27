@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-from styles import BG, PRIMARY, PRIMARY_HOVER, TEXT, BORDER, configurar_tema
+from styles import ACCENT, ACCENT_HOVER, BG, BORDER, CARD, FONT_FAMILY, TEXT, configurar_tema
 from frames import (
     SidebarFrame,
     DashboardFrame,
@@ -42,40 +42,45 @@ class LegalDeskApp(ctk.CTk):
         self._crear_header()
 
         self.contenedor = ctk.CTkFrame(self.main, fg_color=BG, corner_radius=0)
-        self.contenedor.grid(row=1, column=0, sticky="nsew", padx=24, pady=(8, 24))
+        self.contenedor.grid(row=1, column=0, sticky="nsew", padx=28, pady=(8, 24))
         self.contenedor.grid_rowconfigure(0, weight=1)
         self.contenedor.grid_columnconfigure(0, weight=1)
 
     def _crear_header(self):
         header = ctk.CTkFrame(self.main, fg_color=BG, corner_radius=0)
-        header.grid(row=0, column=0, sticky="ew", padx=24, pady=(18, 8))
+        header.grid(row=0, column=0, sticky="ew", padx=28, pady=(22, 10))
         header.grid_columnconfigure(0, weight=1)
 
         self.titulo_header = ctk.CTkLabel(
             header,
             text="Dashboard",
-            font=ctk.CTkFont(size=25, weight="bold"),
+            font=ctk.CTkFont(family=FONT_FAMILY, size=24, weight="bold"),
             text_color=TEXT,
         )
         self.titulo_header.grid(row=0, column=0, sticky="w")
 
+        buscador = ctk.CTkFrame(header, height=38, corner_radius=10, fg_color=CARD, border_width=1, border_color=BORDER)
+        buscador.grid(row=0, column=1, padx=12)
+        buscador.grid_propagate(False)
+        buscador.configure(width=320)
+        ctk.CTkLabel(buscador, text="🔍", font=ctk.CTkFont(size=13), text_color=TEXT).pack(side="left", padx=(12, 4))
         ctk.CTkEntry(
-            header,
-            width=330,
-            height=40,
+            buscador,
+            fg_color="transparent",
+            border_width=0,
             placeholder_text="Buscar cliente, caso o expediente...",
-            border_color=BORDER,
-            fg_color="white",
-        ).grid(row=0, column=1, padx=12)
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+        ).pack(side="left", fill="both", expand=True, padx=(0, 12))
 
         ctk.CTkButton(
             header,
             text="+ Nuevo caso",
-            height=40,
-            width=135,
-            fg_color=PRIMARY,
-            hover_color=PRIMARY_HOVER,
-            corner_radius=10,
+            height=38,
+            width=130,
+            fg_color=ACCENT,
+            hover_color=ACCENT_HOVER,
+            corner_radius=8,
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"),
             command=lambda: None,
         ).grid(row=0, column=2)
 

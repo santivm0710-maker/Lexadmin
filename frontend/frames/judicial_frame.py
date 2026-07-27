@@ -42,8 +42,8 @@ class JudicialFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=1, column=0, columnspan=5, sticky="e", padx=12, pady=(0, 16))
         ctk.CTkButton(botones, text="Eliminar seleccionado", fg_color=DANGER, hover_color=DANGER, command=self._eliminar_seleccionado).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
-        self.boton_guardar = ctk.CTkButton(botones, text="Guardar datos", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_datos)
+        ctk.CTkButton(botones, text="✎  Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
+        self.boton_guardar = ctk.CTkButton(botones, text="＋  Guardar datos", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_datos)
         self.boton_guardar.pack(side="left", padx=5)
 
         card = tarjeta(self, "Información judicial registrada")
@@ -62,7 +62,7 @@ class JudicialFrame(ctk.CTkFrame):
         for campo in (self.campo_caso, self.campo_juzgado, self.campo_juez, self.campo_fiscal, self.campo_contacto):
             campo.entry.delete(0, "end")
         self._editando_id = None
-        self.boton_guardar.configure(text="Guardar datos")
+        self.boton_guardar.configure(text="＋  Guardar datos")
 
     def _cargar_seleccionado(self):
         seleccion = self.tabla.selection()
@@ -89,7 +89,7 @@ class JudicialFrame(ctk.CTkFrame):
         self.campo_contacto.entry.insert(0, item.get("contacto_institucional", "") or "")
 
         self._editando_id = item_id
-        self.boton_guardar.configure(text="Actualizar datos")
+        self.boton_guardar.configure(text="✓  Actualizar datos")
 
     def _guardar_datos(self):
         caso = self.campo_caso.entry.get().strip()

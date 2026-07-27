@@ -45,8 +45,8 @@ class AgendaFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=2, column=0, columnspan=3, sticky="e", padx=16, pady=(0, 16))
         ctk.CTkButton(botones, text="Eliminar seleccionado", fg_color=DANGER, hover_color=DANGER, command=self._eliminar_seleccionado).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
-        self.boton_guardar = ctk.CTkButton(botones, text="Programar", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_evento)
+        ctk.CTkButton(botones, text="✎  Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
+        self.boton_guardar = ctk.CTkButton(botones, text="＋  Programar", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_evento)
         self.boton_guardar.pack(side="left", padx=5)
 
         card = tarjeta(self, "Eventos próximos")
@@ -65,7 +65,7 @@ class AgendaFrame(ctk.CTkFrame):
         for campo in (self.campo_fecha, self.campo_hora, self.campo_caso, self.campo_actividad, self.campo_lugar, self.campo_prioridad):
             campo.entry.delete(0, "end")
         self._editando_id = None
-        self.boton_guardar.configure(text="Programar")
+        self.boton_guardar.configure(text="＋  Programar")
 
     def _cargar_seleccionado(self):
         seleccion = self.tabla.selection()
@@ -100,7 +100,7 @@ class AgendaFrame(ctk.CTkFrame):
         self.campo_prioridad.entry.insert(0, item.get("prioridad", "") or "")
 
         self._editando_id = item_id
-        self.boton_guardar.configure(text="Actualizar evento")
+        self.boton_guardar.configure(text="✓  Actualizar evento")
 
     def _guardar_evento(self):
         fecha_txt = self.campo_fecha.entry.get().strip()

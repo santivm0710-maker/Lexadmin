@@ -38,8 +38,8 @@ class ExpedientesFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=1, column=0, columnspan=4, sticky="e", padx=16, pady=(0, 16))
         ctk.CTkButton(botones, text="Eliminar seleccionado", fg_color=DANGER, hover_color=DANGER, command=self._eliminar_seleccionado).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
-        self.boton_guardar = ctk.CTkButton(botones, text="Subir PDF", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_documento)
+        ctk.CTkButton(botones, text="✎  Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
+        self.boton_guardar = ctk.CTkButton(botones, text="＋  Subir PDF", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_documento)
         self.boton_guardar.pack(side="left", padx=5)
 
         card = tarjeta(self, "Documentos digitalizados")
@@ -58,7 +58,7 @@ class ExpedientesFrame(ctk.CTkFrame):
         for campo in (self.campo_caso, self.campo_documento, self.campo_tipo):
             campo.entry.delete(0, "end")
         self._editando_id = None
-        self.boton_guardar.configure(text="Subir PDF")
+        self.boton_guardar.configure(text="＋  Subir PDF")
 
     def _cargar_seleccionado(self):
         seleccion = self.tabla.selection()
@@ -81,7 +81,7 @@ class ExpedientesFrame(ctk.CTkFrame):
         self.campo_tipo.entry.insert(0, item.get("tipo_documento", ""))
 
         self._editando_id = item_id
-        self.boton_guardar.configure(text="Actualizar documento")
+        self.boton_guardar.configure(text="✓  Actualizar documento")
 
     def _guardar_documento(self):
         caso = self.campo_caso.entry.get().strip()

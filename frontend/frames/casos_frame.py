@@ -44,8 +44,8 @@ class CasosFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=2, column=0, columnspan=3, sticky="e", padx=16, pady=(0, 16))
         ctk.CTkButton(botones, text="Eliminar seleccionado", fg_color=DANGER, hover_color=DANGER, command=self._eliminar_seleccionado).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
-        self.boton_guardar = ctk.CTkButton(botones, text="Crear caso", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_caso)
+        ctk.CTkButton(botones, text="✎  Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
+        self.boton_guardar = ctk.CTkButton(botones, text="＋  Crear caso", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_caso)
         self.boton_guardar.pack(side="left", padx=5)
 
         card = tarjeta(self, "Casos registrados")
@@ -64,7 +64,7 @@ class CasosFrame(ctk.CTkFrame):
         for campo in (self.campo_cliente, self.campo_expediente, self.campo_tipo, self.campo_estado, self.campo_prioridad, self.campo_abogado):
             campo.entry.delete(0, "end")
         self._editando_id = None
-        self.boton_guardar.configure(text="Crear caso")
+        self.boton_guardar.configure(text="＋  Crear caso")
 
     def _cargar_seleccionado(self):
         seleccion = self.tabla.selection()
@@ -93,7 +93,7 @@ class CasosFrame(ctk.CTkFrame):
         self.campo_abogado.entry.insert(0, item.get("abogado_responsable", "") or "")
 
         self._editando_id = item_id
-        self.boton_guardar.configure(text="Actualizar caso")
+        self.boton_guardar.configure(text="✓  Actualizar caso")
 
     def _guardar_caso(self):
         cliente = self.campo_cliente.entry.get().strip()

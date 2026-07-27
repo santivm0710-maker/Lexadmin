@@ -42,8 +42,8 @@ class ClientesFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=1, column=0, columnspan=4, sticky="e", padx=16, pady=(0, 16))
         ctk.CTkButton(botones, text="Eliminar seleccionado", fg_color=DANGER, hover_color=DANGER, command=self._eliminar_seleccionado).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
-        self.boton_guardar = ctk.CTkButton(botones, text="Guardar cliente", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_cliente)
+        ctk.CTkButton(botones, text="✎  Editar seleccionado", fg_color=INFO, hover_color=INFO, command=self._cargar_seleccionado).pack(side="left", padx=5)
+        self.boton_guardar = ctk.CTkButton(botones, text="＋  Guardar cliente", fg_color=SUCCESS, hover_color=SUCCESS, command=self._guardar_cliente)
         self.boton_guardar.pack(side="left", padx=5)
 
     def _crear_tabla(self):
@@ -63,7 +63,7 @@ class ClientesFrame(ctk.CTkFrame):
         for campo in (self.campo_nombre, self.campo_cedula, self.campo_telefono, self.campo_correo):
             campo.entry.delete(0, "end")
         self._editando_id = None
-        self.boton_guardar.configure(text="Guardar cliente")
+        self.boton_guardar.configure(text="＋  Guardar cliente")
 
     def _cargar_seleccionado(self):
         seleccion = self.tabla.selection()
@@ -86,7 +86,7 @@ class ClientesFrame(ctk.CTkFrame):
         self.campo_correo.entry.insert(0, item.get("correo", "") or "")
 
         self._editando_id = item_id
-        self.boton_guardar.configure(text="Actualizar cliente")
+        self.boton_guardar.configure(text="✓  Actualizar cliente")
 
     def _guardar_cliente(self):
         nombre = self.campo_nombre.entry.get().strip()
