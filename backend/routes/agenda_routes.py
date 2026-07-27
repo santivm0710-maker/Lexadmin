@@ -10,36 +10,24 @@ service = AgendaService()
 
 @router.get("/", response_model=ApiResponse)
 def listar_agenda():
-    """Lista los eventos de agenda almacenados en la base de datos."""
-    return ApiResponse(
-        success=True,
-        message="Datos obtenidos correctamente.",
-        data=service.listar(),
-    )
+    return ApiResponse(success=True, message="Agenda obtenida correctamente.", data=service.listar())
 
 
 @router.post("/", response_model=ApiResponse)
 def crear_evento(evento: AgendaCreate):
-    """Crea un evento de agenda y lo guarda en la base de datos."""
-    return ApiResponse(
-        success=True,
-        message="Evento creado correctamente.",
-        data=service.crear(evento),
-    )
+    return ApiResponse(success=True, message="Evento creado correctamente.", data=service.crear(evento))
 
 
-@router.put("/{id_evento}", response_model=ApiResponse)
-def actualizar_evento(id_evento: int, evento: AgendaCreate):
-    """Actualiza un evento de agenda existente."""
-    resultado = service.actualizar(id_evento, evento)
+@router.put("/{id_agenda}", response_model=ApiResponse)
+def actualizar_evento(id_agenda: int, evento: AgendaCreate):
+    resultado = service.actualizar(id_agenda, evento)
     if resultado is None:
         raise HTTPException(status_code=404, detail="Evento no encontrado.")
     return ApiResponse(success=True, message="Evento actualizado correctamente.", data=resultado)
 
 
-@router.delete("/{id_evento}", response_model=ApiResponse)
-def eliminar_evento(id_evento: int):
-    """Elimina un evento de agenda existente."""
-    if not service.eliminar(id_evento):
+@router.delete("/{id_agenda}", response_model=ApiResponse)
+def eliminar_evento(id_agenda: int):
+    if not service.eliminar(id_agenda):
         raise HTTPException(status_code=404, detail="Evento no encontrado.")
     return ApiResponse(success=True, message="Evento eliminado correctamente.", data=None)

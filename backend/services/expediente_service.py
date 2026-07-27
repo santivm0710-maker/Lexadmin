@@ -1,6 +1,9 @@
 from backend.entities import Expediente
 from backend.repositories.expediente_repository import ExpedienteRepository
 from backend.schemas.requests import ExpedienteCreate
+from backend.services import auditoria
+
+MODULO = "Expedientes"
 
 
 class ExpedienteService:
@@ -11,10 +14,18 @@ class ExpedienteService:
         return self.repository.list_all()
 
     def crear(self, datos: ExpedienteCreate) -> Expediente:
-        return self.repository.add(Expediente(id_expediente=0, **datos.model_dump()))
+        exp = self.repository.add(Expediente(**datos.model_dump()))
+        auditoria.registrar(MODULO, "Creación", f"Se subió el documento {exp.nombre_documento}.")
+        return exp
 
-    def actualizar(self, id_expediente: int, datos: ExpedienteCreate) -> Expediente | None:
-        return self.repository.update(id_expediente, Expediente(id_expediente=id_expediente, **datos.model_dump()))
+    def actualizar(self, id_expediente: int, datos: ExpedienteCreate) -> "Expediente | None":
+        exp = self.repository.update(id_expediente, Expediente(id_expediente=id_expediente, **datos.model_dump()))
+        if exp is not None:
+            auditoria.registrar(MODULO, "Actualización", f"Se actualizó el documento {exp.nombre_documento}.")
+        return exp
 
     def eliminar(self, id_expediente: int) -> bool:
-        return self.repository.delete(id_expediente)
+        eliminado = self.repository.delete(id_expediente)
+        if eliminado:
+            auditoria.registrar(MODULO, "Eliminación", f"Se eliminó el expediente con ID {id_expediente}.")
+        return eliminado

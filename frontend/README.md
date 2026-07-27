@@ -1,8 +1,10 @@
-# LexAdmin - Frontend visual en CustomTkinter
+# LexAdmin - Frontend de escritorio en CustomTkinter
 
-Prototipo visual de escritorio para un sistema de gestión de despacho legal.
-No contiene funcionalidades reales, conexión a base de datos, backend, OCR ni autenticación funcional.
-Está pensado para que después se conecte con controladores, servicios o backend.
+Interfaz de escritorio del sistema de gestión de despacho legal.
+Está **conectada al backend FastAPI y a la base de datos MySQL**: los
+formularios crean, editan y eliminan información real, con validación de
+campos y filtrado en vivo. Consulta el `README.md` de la raíz para la guía
+completa de instalación y uso.
 
 ## Estructura organizada por clases
 

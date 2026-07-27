@@ -1,22 +1,31 @@
 import customtkinter as ctk
 
-# Colores generales del prototipo — paleta sobria de tono profesional
-BG = "#F3F4F8"
-CARD = "#FFFFFF"
-ROW_ALT = "#F8FAFC"
-PRIMARY = "#24325F"
-PRIMARY_HOVER = "#1B2547"
-ACCENT = "#3B5BDB"
-ACCENT_HOVER = "#2F4BC0"
-SIDEBAR = "#151B2E"
-SIDEBAR_HOVER = "#232B45"
-TEXT = "#111827"
-MUTED = "#6B7280"
-BORDER = "#E5E7EB"
-SUCCESS = "#15803D"
+# ============================================================
+# Paleta LexAdmin — sobria y profesional (estilo despacho legal)
+# ============================================================
+BG = "#EEF1F6"          # fondo general
+CARD = "#FFFFFF"         # tarjetas
+ROW_ALT = "#F6F8FC"      # filas alternas de tablas
+
+SIDEBAR = "#141C2E"      # barra lateral (azul marino profundo)
+SIDEBAR_HOVER = "#222C44"
+SIDEBAR_TEXT = "#C7CFE0"
+
+PRIMARY = "#1F2A44"      # azul marino
+ACCENT = "#B08A46"       # dorado discreto (detalle elegante)
+ACCENT_HOVER = "#9A7838"
+INFO = "#2F5BD0"         # azul para acciones secundarias
+INFO_HOVER = "#254BB0"
+
+TEXT = "#1A2233"
+MUTED = "#6B7488"
+BORDER = "#E2E6EE"
+
+SUCCESS = "#1F7A46"
+SUCCESS_HOVER = "#186237"
 WARNING = "#B45309"
-DANGER = "#B91C1C"
-INFO = "#2563EB"
+DANGER = "#B23B3B"
+DANGER_HOVER = "#963030"
 
 FONT_FAMILY = "Segoe UI"
 

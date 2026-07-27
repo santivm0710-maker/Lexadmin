@@ -5,4 +5,4 @@ from backend.repositories.base_repository import BaseRepository
 class AgendaRepository(BaseRepository[EventoAgenda]):
     table_name = "agenda"
     entity_class = EventoAgenda
-    pk_field = "id_evento"
+    pk_field = "id_agenda"

@@ -1,6 +1,9 @@
 from backend.entities import EventoAgenda
 from backend.repositories.agenda_repository import AgendaRepository
 from backend.schemas.requests import AgendaCreate
+from backend.services import auditoria
+
+MODULO = "Agenda"
 
 
 class AgendaService:
@@ -11,10 +14,18 @@ class AgendaService:
         return self.repository.list_all()
 
     def crear(self, datos: AgendaCreate) -> EventoAgenda:
-        return self.repository.add(EventoAgenda(id_evento=0, **datos.model_dump()))
+        evento = self.repository.add(EventoAgenda(**datos.model_dump()))
+        auditoria.registrar(MODULO, "Creación", f"Se programó: {evento.actividad} ({evento.fecha}).")
+        return evento
 
-    def actualizar(self, id_evento: int, datos: AgendaCreate) -> EventoAgenda | None:
-        return self.repository.update(id_evento, EventoAgenda(id_evento=id_evento, **datos.model_dump()))
+    def actualizar(self, id_agenda: int, datos: AgendaCreate) -> "EventoAgenda | None":
+        evento = self.repository.update(id_agenda, EventoAgenda(id_agenda=id_agenda, **datos.model_dump()))
+        if evento is not None:
+            auditoria.registrar(MODULO, "Actualización", f"Se actualizó el evento: {evento.actividad}.")
+        return evento
 
-    def eliminar(self, id_evento: int) -> bool:
-        return self.repository.delete(id_evento)
+    def eliminar(self, id_agenda: int) -> bool:
+        eliminado = self.repository.delete(id_agenda)
+        if eliminado:
+            auditoria.registrar(MODULO, "Eliminación", f"Se eliminó el evento de agenda con ID {id_agenda}.")
+        return eliminado

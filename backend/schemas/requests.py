@@ -1,54 +1,51 @@
-from datetime import date, datetime, time
+"""Modelos de entrada (lo que el frontend envía al crear/editar)."""
+
+from datetime import date, time
 from typing import Optional
 
 from pydantic import BaseModel
 
 
 class ClienteCreate(BaseModel):
-    nombre: str
-    cedula: str
+    nombre_completo: str
+    identificacion: str
     telefono: Optional[str] = None
     correo: Optional[str] = None
-    caso_relacionado: Optional[str] = None
 
 
 class CasoCreate(BaseModel):
-    numero_expediente: str
     id_cliente: int
-    tipo_caso: str
-    estado: str
-    prioridad: str
+    numero_expediente: str
+    tipo_proceso: Optional[str] = None
+    estado: Optional[str] = None
+    prioridad: Optional[str] = None
     abogado_responsable: Optional[str] = None
+    descripcion: Optional[str] = None
+    fecha_inicio: Optional[date] = None
+
+
+class JudicialCreate(BaseModel):
+    id_caso: int
+    juzgado: Optional[str] = None
+    juez: Optional[str] = None
+    fiscal: Optional[str] = None
+    contacto_institucional: Optional[str] = None
 
 
 class ExpedienteCreate(BaseModel):
+    id_cliente: int
     id_caso: int
-    nombre_documento: str
-    tipo_documento: str
-    ruta_archivo: Optional[str] = None
-    estado_ocr: str = "Pendiente"
+    nombre_documento: Optional[str] = None
+    tipo_documento: Optional[str] = None
+    ruta_pdf: Optional[str] = None
+    estado_ocr: Optional[str] = "Pendiente"
 
 
 class AgendaCreate(BaseModel):
     id_caso: int
     fecha: date
     hora: time
-    actividad: str
-    lugar: str
-    prioridad: str
-
-
-class JudicialCreate(BaseModel):
-    id_caso: int
-    juzgado: str
-    juez: Optional[str] = None
-    fiscal: Optional[str] = None
-    contacto_institucional: Optional[str] = None
-
-
-class BitacoraCreate(BaseModel):
-    fecha_hora: datetime
-    actor: str
-    modulo: str
-    accion: str
-    detalle: str
+    actividad: Optional[str] = None
+    lugar: Optional[str] = None
+    prioridad: Optional[str] = None
+    observaciones: Optional[str] = None
