@@ -1,314 +1,119 @@
 # Backend - LexAdmin
 
-Esta carpeta contiene la implementación del backend de **LexAdmin**, desarrollada con **FastAPI**. El proyecto mantiene una arquitectura por capas (entidades, repositorios, servicios y rutas) y actualmente cuenta con una **conexión real a una base de datos MySQL**, dejando preparada la estructura para implementar la persistencia completa de la información.
+Esta carpeta contiene el backend de **LexAdmin**, hecho con **FastAPI**. Sigue
+una arquitectura por capas (entidades, repositorios, servicios y rutas) y está
+conectado a una base de datos **MySQL real**: ya no hay datos simulados, todo
+lo que expone la API sale de la base de datos.
 
-## Objetivo
+Para la guía completa de instalación y uso, revisa el `README.md` de la raíz
+del proyecto. Este archivo se enfoca en explicar cómo está armado el backend.
 
-Representar la capa del servidor de LexAdmin, incluyendo:
-
-* Configuración general del backend.
-* Conexión a base de datos MySQL.
-* Entidades principales del sistema.
-* Repositorios organizados por módulo.
-* Servicios para la lógica de negocio.
-* Rutas API para cada módulo.
-* Separación de responsabilidades para facilitar el mantenimiento y la escalabilidad.
-
----
-
-# Estructura
+## Estructura
 
 ```text
 backend/
 ├── main.py
 ├── config.py
 ├── requirements.txt
-├── README.md
+├── test_connection.py
 ├── database/
-│   ├── __init__.py
-│   ├── connection.py
-│   └── lexadmin.sql
-├── entities/
-│   ├── __init__.py
-│   ├── cliente.py
-│   ├── caso.py
-│   ├── expediente.py
-│   ├── agenda.py
-│   ├── judicial.py
-│   └── bitacora.py
-├── repositories/
-│   ├── __init__.py
-│   ├── base_repository.py
-│   ├── mock_data.py
-│   ├── cliente_repository.py
-│   ├── caso_repository.py
-│   ├── expediente_repository.py
-│   ├── agenda_repository.py
-│   ├── judicial_repository.py
-│   └── bitacora_repository.py
-├── services/
-│   ├── __init__.py
-│   ├── cliente_service.py
-│   ├── caso_service.py
-│   ├── expediente_service.py
-│   ├── agenda_service.py
-│   ├── judicial_service.py
-│   └── bitacora_service.py
-├── routes/
-│   ├── __init__.py
-│   ├── clientes_routes.py
-│   ├── casos_routes.py
-│   ├── expedientes_routes.py
-│   ├── agenda_routes.py
-│   ├── judicial_routes.py
-│   └── bitacora_routes.py
-└── schemas/
-    ├── __init__.py
-    └── common.py
+│   ├── connection.py       # pool de conexiones + helpers de consulta
+│   └── lexadmin.sql        # crea la base de datos y las tablas
+├── entities/                # una clase por tabla (cliente, caso, expediente...)
+├── repositories/            # SELECT/INSERT/UPDATE/DELETE de cada tabla
+├── services/                # lógica de negocio + registro automático en bitácora
+├── schemas/                 # validación de lo que llega por la API (pydantic)
+└── routes/                  # los endpoints de FastAPI
 ```
 
----
-
-# Arquitectura
-
-El backend sigue una arquitectura por capas:
+## Arquitectura
 
 ```text
-Cliente
+Cliente (frontend)
     │
     ▼
-Routes (FastAPI)
+Routes (FastAPI)     recibe la petición HTTP y valida el body
     │
     ▼
-Services
+Services              lógica de negocio, y registra la acción en la bitácora
     │
     ▼
-Repositories
+Repositories          arma y ejecuta el SQL
     │
     ▼
 Database (MySQL)
 ```
 
-Cada capa tiene una responsabilidad específica:
+## Base de datos
 
-* **Routes:** reciben las peticiones HTTP.
-* **Services:** contienen la lógica de negocio.
-* **Repositories:** administran el acceso a los datos.
-* **Database:** gestiona la conexión con MySQL.
+El script `backend/database/lexadmin.sql` crea la base `lexadmin` con las
+tablas `clientes`, `casos`, `informacion_judicial`, `expedientes`, `agenda`
+y `bitacora`, con sus llaves foráneas correspondientes.
 
----
+## Conexión a la base de datos
 
-# Base de datos
+`backend/database/connection.py` mantiene un pool de conexiones
+(`mysql-connector-python`) y expone unos helpers (`fetch_all`, `fetch_one`,
+`execute`) que usan los repositorios para no repetir el manejo de cursores en
+cada consulta. Los datos de conexión (host, puerto, usuario, contraseña) se
+configuran en `config.py`.
 
-El proyecto utiliza **MySQL** como gestor de base de datos.
-
-La estructura de la base de datos se encuentra en:
-
-```text
-backend/database/lexadmin.sql
-```
-
-Este script crea la base de datos **lexadmin** junto con las tablas principales del sistema.
-
-Las tablas implementadas son:
-
-* clientes
-* casos
-* agenda
-* expedientes
-* bitacora
-
-Estas tablas representan las entidades utilizadas actualmente por el prototipo.
-
----
-
-# Conexión a la base de datos
-
-La conexión se encuentra implementada en:
+## Endpoints disponibles
 
 ```text
-backend/database/connection.py
+GET   /                     estado del backend
+GET   /conexion             prueba la conexión a MySQL
+
+GET/POST     /clientes/         PUT/DELETE /clientes/{id}
+GET/POST     /casos/            PUT/DELETE /casos/{id}
+GET/POST     /expedientes/      PUT/DELETE /expedientes/{id}
+GET/POST     /agenda/           PUT/DELETE /agenda/{id}
+GET/POST     /judicial/         PUT/DELETE /judicial/{id}
+
+GET   /bitacora/            solo lectura, se llena sola
+GET   /dashboard/           indicadores calculados en vivo
+GET   /reportes/            indicadores calculados en vivo
 ```
 
-La clase `DatabaseConnection` administra un pool de conexiones mediante `mysql-connector-python`, permitiendo reutilizar conexiones y facilitando futuras operaciones CRUD.
+Todos están documentados automáticamente en `/docs` una vez que el backend
+está corriendo.
 
-La configuración se obtiene desde `config.py`, donde se definen:
-
-* Host
-* Puerto
-* Nombre de la base de datos
-* Usuario
-* Contraseña
-
----
-
-# Entidades
-
-El backend incluye las entidades principales del sistema:
-
-* Cliente
-* Caso
-* Expediente
-* Agenda
-* Información judicial
-* Bitácora
-
-Actualmente se utilizan como representación de la información manejada por el sistema y servirán como base para la futura implementación de persistencia completa.
-
----
-
-# Endpoints disponibles
-
-El backend expone los siguientes endpoints:
-
-```text
-GET /
-GET /conexion
-GET /clientes/
-GET /casos/
-GET /expedientes/
-GET /agenda/
-GET /judicial/
-GET /bitacora/
-GET /dashboard/
-GET /reportes/
-```
-
-En la versión actual los repositorios continúan utilizando datos simulados, aunque la infraestructura de conexión a MySQL ya se encuentra implementada.
-
----
-
-# Instalación
-
-Desde la carpeta del backend:
+## Instalación rápida
 
 ```bash
 python -m venv venv
-```
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Linux/macOS
 
-Activar el entorno virtual.
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux/macOS:
-
-```bash
-source venv/bin/activate
-```
-
-Instalar dependencias:
-
-```bash
 pip install -r requirements.txt
 ```
 
-Instalar el conector de MySQL:
+Antes de correrlo, crea la base de datos con el script de `database/lexadmin.sql`
+(los pasos completos están en el README de la raíz).
 
-```bash
-pip install mysql-connector-python
-```
+## Ejecutarlo
 
----
-
-# Configuración
-
-Modificar los parámetros de conexión en `config.py`:
-
-* database_host
-* database_port
-* database_name
-* database_user
-* database_password
-
-También es posible utilizar un archivo `.env` para definir estas variables.
-
----
-
-# Crear la base de datos
-
-Antes de ejecutar el proyecto, importar el archivo:
-
-```text
-backend/database/lexadmin.sql
-```
-
-en MySQL Workbench o ejecutar su contenido desde la consola de MySQL.
-
----
-
-# Ejecutar el backend
-
-Desde la raíz del proyecto:
+Desde la raíz del proyecto (no desde esta carpeta):
 
 ```bash
 uvicorn backend.main:app --reload
 ```
 
-La documentación automática estará disponible en:
+Documentación interactiva en `http://127.0.0.1:8000/docs`.
 
-```text
-http://127.0.0.1:8000/docs
-```
+## Estado actual
 
----
+Lo que ya tiene:
 
-# Ejecutar el frontend
+- Arquitectura por capas completa (entidades, repositorios, servicios, rutas).
+- Conexión real a MySQL con pool de conexiones.
+- CRUD completo (crear, listar, editar, eliminar) en los cinco módulos con
+  formulario.
+- Bitácora automática y dashboard/reportes calculados en vivo.
+- Manejo de errores de MySQL traducido a respuestas HTTP claras (409, 400...).
 
-En otra terminal:
+Lo que falta / posibles mejoras a futuro:
 
-```bash
-cd frontend
-python main.py
-```
-
-El archivo `frontend/api_client.py` actúa como intermediario entre la interfaz gráfica y la API.
-
----
-
-# Estado actual
-
-Actualmente el proyecto incluye:
-
-* Arquitectura organizada por capas.
-* API desarrollada con FastAPI.
-* Conexión real a MySQL.
-* Pool de conexiones.
-* Script SQL para crear la base de datos.
-* Entidades principales.
-* Servicios.
-* Repositorios.
-* Rutas API.
-* Configuración centralizada.
-
-Actualmente no incluye:
-
-* CRUD conectado a MySQL.
-* Persistencia de información.
-* SQLAlchemy.
-* Migraciones.
-* Autenticación.
-* Gestión de usuarios y roles.
-* Validaciones completas.
-* Carga real de documentos PDF.
-* OCR.
-* Reportes dinámicos.
-
----
-
-# Próximas mejoras
-
-Las siguientes funcionalidades podrán incorporarse en futuras versiones:
-
-1. Implementar CRUD utilizando MySQL.
-2. Sustituir los datos simulados por consultas reales.
-3. Integrar SQLAlchemy como ORM.
-4. Implementar migraciones con Alembic.
-5. Incorporar autenticación y autorización.
-6. Gestionar carga de documentos PDF.
-7. Implementar OCR para expedientes.
-8. Generar reportes automáticos.
-9. Integrar completamente el frontend con la base de datos.
+- Autenticación y manejo de usuarios/roles.
+- Carga real de archivos PDF y OCR de expedientes.
+- Un ORM (SQLAlchemy) y migraciones (Alembic), si el proyecto crece.

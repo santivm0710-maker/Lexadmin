@@ -1,90 +1,57 @@
-# LexAdmin - Frontend de escritorio en CustomTkinter
+# LexAdmin - Frontend de escritorio
 
-Interfaz de escritorio del sistema de gestión de despacho legal.
-Está **conectada al backend FastAPI y a la base de datos MySQL**: los
-formularios crean, editan y eliminan información real, con validación de
-campos y filtrado en vivo. Consulta el `README.md` de la raíz para la guía
-completa de instalación y uso.
+Interfaz de escritorio hecha con Python y CustomTkinter. Está conectada al
+backend FastAPI y, a través de él, a MySQL: los formularios crean, editan y
+eliminan información real, con validación de campos y filtrado en vivo.
 
-## Estructura organizada por clases
+Consulta el `README.md` de la raíz para la guía completa de instalación y uso.
+
+## Estructura
 
 ```text
 frontend/
-├── main.py
-├── app.py
-├── data.py
-├── styles.py
-├── ui_helpers.py
-├── requirements.txt
-├── README.md
+├── main.py            # punto de entrada
+├── app.py              # ventana principal, menú, buscador y navegación
+├── api_client.py        # toda la comunicación HTTP con el backend
+├── crud_frame.py        # base que reutilizan los módulos con formulario
+├── data.py              # opciones del menú lateral
+├── styles.py             # colores, fuente y tema visual
+├── ui_helpers.py          # tablas, campos de texto, combos y validaciones
 └── frames/
-    ├── __init__.py
-    ├── sidebar_frame.py
-    ├── dashboard_frame.py
+    ├── sidebar_frame.py       # menú lateral
+    ├── dashboard_frame.py     # panel principal
     ├── clientes_frame.py
     ├── casos_frame.py
     ├── expedientes_frame.py
     ├── agenda_frame.py
     ├── judicial_frame.py
     ├── reportes_frame.py
-    └── bitacora_frame.py
+    └── bitacora_frame.py       # solo lectura, se llena sola
 ```
 
-## Qué contiene cada archivo
+## Cómo está armado
 
-- `main.py`: punto de entrada del programa.
-- `app.py`: ventana principal `LegalDeskApp`, navegación, header y contenedor de páginas.
-- `data.py`: datos de ejemplo del prototipo.
-- `styles.py`: colores y configuración visual general.
-- `ui_helpers.py`: funciones reutilizables para títulos, tarjetas, tablas y entradas.
-- `frames/sidebar_frame.py`: clase `SidebarFrame`.
-- `frames/dashboard_frame.py`: clase `DashboardFrame`.
-- `frames/clientes_frame.py`: clase `ClientesFrame`.
-- `frames/casos_frame.py`: clase `CasosFrame`.
-- `frames/expedientes_frame.py`: clase `ExpedientesFrame`.
-- `frames/agenda_frame.py`: clase `AgendaFrame`.
-- `frames/judicial_frame.py`: clase `JudicialFrame`.
-- `frames/reportes_frame.py`: clase `ReportesFrame`.
-- `frames/bitacora_frame.py`: clase `BitacoraFrame`.
+Los cinco módulos con formulario (clientes, casos, expedientes, agenda e
+información judicial) heredan de `CrudFrame` (en `crud_frame.py`), que se
+encarga de la parte repetitiva: construir el formulario, guardar, editar,
+eliminar, refrescar la tabla y filtrar. Cada módulo solo describe sus propios
+campos y cómo convertir sus datos — así se evita repetir la misma lógica ocho
+veces.
 
-## Cómo ejecutar
+`api_client.py` es el único archivo que habla con el backend. Expone
+funciones genéricas (`listar`, `crear`, `actualizar`, `eliminar`) más algunos
+ayudantes para el dashboard, los reportes y para buscar un cliente o un caso
+por nombre/expediente.
 
-Desde la carpeta `frontend`:
+## Cómo ejecutarlo
+
+Necesita el backend corriendo (ver el README de la raíz). Desde la carpeta
+`frontend`:
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-## Nota
-
-La lógica visual se mantiene igual, pero ahora cada frame está separado en su propio archivo para que sea más fácil mantener, revisar y ampliar el proyecto.
-
----
-
-## Conexión con el backend prototipo
-
-El frontend incluye el archivo `api_client.py`, que intenta leer datos desde el backend FastAPI en:
-
-```bash
-http://127.0.0.1:8000
-```
-
-Para probar la integración:
-
-1. Ejecutar primero el backend desde la raíz del proyecto:
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-2. En otra terminal, ejecutar el frontend:
-
-```bash
-cd frontend
-python main.py
-```
-
-Si el backend está activo, las tablas de clientes, casos, expedientes, agenda, información judicial, reportes, dashboard y bitácora consumirán los endpoints simulados.
-
-Si el backend no está activo, el frontend usará automáticamente los datos locales de `data.py` como respaldo. Esto permite seguir usando el prototipo visual aunque la API no esté corriendo.
+Si el backend no está corriendo, la ventana abre igual pero las tablas salen
+vacías y al intentar guardar algo avisa que no se pudo conectar.
