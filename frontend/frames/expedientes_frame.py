@@ -2,6 +2,9 @@ import api_client as api
 from crud_frame import CrudFrame
 from ui_helpers import formatear_fecha
 
+TIPOS_DOCUMENTO = ["Expediente", "Prueba", "Resolución", "Contrato", "Escrito", "Otro"]
+ESTADOS_OCR = ["Pendiente", "Procesado"]
+
 
 class ExpedientesFrame(CrudFrame):
     recurso = "expedientes"
@@ -15,14 +18,15 @@ class ExpedientesFrame(CrudFrame):
     texto_actualizar = "Actualizar documento"
 
     def definir_campos(self, form):
-        self.campo(form, "caso", "Caso (expediente)", "Ej. #245", 0, 0)
+        self.desplegable(form, "caso", "Caso (expediente)", [], 0, 0, con_placeholder=True)
         self.campo(form, "nombre_documento", "Documento", "archivo.pdf", 0, 1)
-        self.campo(form, "tipo_documento", "Tipo de documento", "Expediente / Prueba", 0, 2, tipo="texto")
-        self.campo(form, "estado_ocr", "Estado OCR", "Pendiente / Procesado", 0, 3, tipo="texto")
+        self.desplegable(form, "tipo_documento", "Tipo de documento", TIPOS_DOCUMENTO, 0, 2)
+        self.desplegable(form, "estado_ocr", "Estado OCR", ESTADOS_OCR, 0, 3)
 
     def refrescar(self):
         self._clientes = {c["id_cliente"]: c["nombre_completo"] for c in api.listar("clientes")}
         self._casos = {c["id_caso"]: c for c in api.listar("casos")}
+        self.opciones("caso", [c["numero_expediente"] for c in self._casos.values()])
         super().refrescar()
 
     def a_fila(self, r):
@@ -32,19 +36,21 @@ class ExpedientesFrame(CrudFrame):
                 r.get("estado_ocr") or "", formatear_fecha(r.get("fecha_subida")))
 
     def validar(self, v):
-        if not v["caso"] or not v["nombre_documento"] or not v["tipo_documento"]:
-            return "Caso, documento y tipo son obligatorios."
+        if not v["caso"]:
+            return "Debes elegir un caso. Si no aparece, créalo primero en Casos."
+        if not v["nombre_documento"]:
+            return "El nombre del documento es obligatorio."
         return None
 
     def a_cuerpo(self, v):
         caso = api.buscar_caso_por_expediente(v["caso"])
         if caso is None:
-            raise ValueError(f"No existe un caso con expediente '{v['caso']}'. Créalo primero.")
+            raise ValueError(f"No existe un caso con expediente '{v['caso']}'.")
         return {
             "id_cliente": caso["id_cliente"],
             "id_caso": caso["id_caso"],
             "nombre_documento": v["nombre_documento"],
-            "tipo_documento": v["tipo_documento"],
+            "tipo_documento": v["tipo_documento"] or None,
             "estado_ocr": v["estado_ocr"] or "Pendiente",
         }
 

@@ -15,7 +15,7 @@ class JudicialFrame(CrudFrame):
     texto_actualizar = "Actualizar datos"
 
     def definir_campos(self, form):
-        self.campo(form, "caso", "Caso (expediente)", "Ej. #245", 0, 0)
+        self.desplegable(form, "caso", "Caso (expediente)", [], 0, 0, con_placeholder=True)
         self.campo(form, "juzgado", "Juzgado", "Nombre del juzgado", 0, 1)
         self.campo(form, "juez", "Juez", "Nombre", 0, 2, tipo="texto")
         self.campo(form, "fiscal", "Fiscal", "Nombre", 0, 3, tipo="texto")
@@ -23,6 +23,7 @@ class JudicialFrame(CrudFrame):
 
     def refrescar(self):
         self._casos = {c["id_caso"]: c for c in api.listar("casos")}
+        self.opciones("caso", [c["numero_expediente"] for c in self._casos.values()])
         super().refrescar()
 
     def a_fila(self, r):
@@ -31,8 +32,10 @@ class JudicialFrame(CrudFrame):
                 r.get("juez") or "", r.get("fiscal") or "", r.get("contacto_institucional") or "")
 
     def validar(self, v):
-        if not v["caso"] or not v["juzgado"]:
-            return "El caso y el juzgado son obligatorios."
+        if not v["caso"]:
+            return "Debes elegir un caso. Si no aparece, créalo primero en Casos."
+        if not v["juzgado"]:
+            return "El juzgado es obligatorio."
         if v["contacto"] and "@" in v["contacto"] and not validar_email(v["contacto"]):
             return "El contacto parece un correo, pero su formato no es válido."
         return None

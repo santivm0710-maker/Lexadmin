@@ -1,4 +1,9 @@
-"""Componentes visuales reutilizables y utilidades del frontend."""
+"""Componentes visuales reutilizables y utilidades del frontend.
+
+Todos los campos de formulario (entradas y desplegables) exponen la misma
+interfaz: `obtener()`, `asignar(valor)` y `limpiar()`, para que el marco base
+los trate por igual.
+"""
 
 import re
 from datetime import datetime
@@ -6,7 +11,9 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
-from styles import ACCENT, BORDER, CARD, FONT_FAMILY, MUTED, ROW_ALT, TEXT
+from styles import ACCENT, ACCENT_HOVER, BORDER, CARD, FONT_FAMILY, MUTED, ROW_ALT, TEXT
+
+PLACEHOLDER = "— Seleccionar —"
 
 # ------------------------------------------------------------------
 # Validación de entradas (evita letras donde van números y viceversa)
@@ -61,7 +68,7 @@ def formatear_hora(valor):
 
 
 # ------------------------------------------------------------------
-# Componentes
+# Componentes de sección
 # ------------------------------------------------------------------
 def titulo_seccion(parent, titulo, subtitulo):
     ctk.CTkLabel(
@@ -85,16 +92,22 @@ def tarjeta(parent, titulo=None):
     return frame
 
 
-def entrada(parent, etiqueta, placeholder, tipo="libre"):
-    contenedor = ctk.CTkFrame(parent, fg_color="transparent")
+def _etiqueta(contenedor, texto):
     ctk.CTkLabel(
-        contenedor, text=etiqueta.upper(),
+        contenedor, text=texto.upper(),
         font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold"), text_color=MUTED,
     ).pack(anchor="w", pady=(0, 4))
+
+
+# ------------------------------------------------------------------
+# Campos de formulario (misma interfaz: obtener / asignar / limpiar)
+# ------------------------------------------------------------------
+def entrada(parent, etiqueta, placeholder, tipo="libre"):
+    contenedor = ctk.CTkFrame(parent, fg_color="transparent")
+    _etiqueta(contenedor, etiqueta)
     campo = ctk.CTkEntry(
         contenedor, placeholder_text=placeholder, height=36, corner_radius=8,
-        fg_color=CARD, border_color=BORDER,
-        font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+        fg_color=CARD, border_color=BORDER, font=ctk.CTkFont(family=FONT_FAMILY, size=12),
     )
     campo.pack(fill="x")
 
@@ -102,10 +115,64 @@ def entrada(parent, etiqueta, placeholder, tipo="libre"):
     if validador is not None:
         campo._entry.configure(validate="key", validatecommand=(validador, "%P"))
 
-    contenedor.entry = campo
+    def asignar(valor):
+        campo.delete(0, "end")
+        if valor not in (None, ""):
+            campo.insert(0, str(valor))
+
+    contenedor.obtener = lambda: campo.get().strip()
+    contenedor.asignar = asignar
+    contenedor.limpiar = lambda: campo.delete(0, "end")
     return contenedor
 
 
+def combo(parent, etiqueta, opciones, con_placeholder=False):
+    """Menú desplegable para elegir entre opciones predeterminadas."""
+    contenedor = ctk.CTkFrame(parent, fg_color="transparent")
+    _etiqueta(contenedor, etiqueta)
+
+    def armar(lista):
+        lista = [str(o) for o in (lista or [])]
+        return ([PLACEHOLDER] + lista) if con_placeholder else (lista or [PLACEHOLDER])
+
+    vals = armar(opciones)
+    variable = ctk.StringVar(value=vals[0])
+    menu = ctk.CTkOptionMenu(
+        contenedor, variable=variable, values=vals, height=36, corner_radius=8,
+        fg_color=CARD, text_color=TEXT, button_color=ACCENT, button_hover_color=ACCENT_HOVER,
+        dropdown_fg_color=CARD, dropdown_text_color=TEXT, dropdown_hover_color=ROW_ALT,
+        font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+        dropdown_font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+    )
+    menu.pack(fill="x")
+
+    def obtener():
+        valor = variable.get().strip()
+        return "" if valor == PLACEHOLDER else valor
+
+    def asignar(valor):
+        variable.set(PLACEHOLDER if valor in (None, "") else str(valor))
+
+    def limpiar():
+        variable.set(vals[0])
+
+    def set_opciones(nuevas):
+        nonlocal vals
+        vals = armar(nuevas)
+        menu.configure(values=vals)
+        if variable.get() not in vals:
+            variable.set(vals[0])
+
+    contenedor.obtener = obtener
+    contenedor.asignar = asignar
+    contenedor.limpiar = limpiar
+    contenedor.set_opciones = set_opciones
+    return contenedor
+
+
+# ------------------------------------------------------------------
+# Tablas
+# ------------------------------------------------------------------
 def crear_tabla(parent, columnas, filas, alto=8, ids=None):
     estilo = ttk.Style()
     estilo.theme_use("default")

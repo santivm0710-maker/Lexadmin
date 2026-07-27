@@ -4,6 +4,9 @@ import api_client as api
 from crud_frame import CrudFrame
 from ui_helpers import formatear_fecha, formatear_hora
 
+ACTIVIDADES = ["Audiencia", "Reunión", "Vencimiento", "Notificación", "Diligencia"]
+PRIORIDADES = ["Alta", "Media", "Baja", "Urgente"]
+
 
 class AgendaFrame(CrudFrame):
     recurso = "agenda"
@@ -19,13 +22,14 @@ class AgendaFrame(CrudFrame):
     def definir_campos(self, form):
         self.campo(form, "fecha", "Fecha", "dd/mm/aaaa", 0, 0, tipo="fecha")
         self.campo(form, "hora", "Hora", "hh:mm", 0, 1, tipo="hora")
-        self.campo(form, "caso", "Caso (expediente)", "Ej. #245", 0, 2)
-        self.campo(form, "actividad", "Actividad", "Audiencia / Reunión", 1, 0, tipo="texto")
+        self.desplegable(form, "caso", "Caso (expediente)", [], 0, 2, con_placeholder=True)
+        self.desplegable(form, "actividad", "Actividad", ACTIVIDADES, 1, 0)
         self.campo(form, "lugar", "Lugar", "Juzgado / Sala", 1, 1)
-        self.campo(form, "prioridad", "Prioridad", "Alta / Media", 1, 2, tipo="texto")
+        self.desplegable(form, "prioridad", "Prioridad", PRIORIDADES, 1, 2)
 
     def refrescar(self):
         self._casos = {c["id_caso"]: c for c in api.listar("casos")}
+        self.opciones("caso", [c["numero_expediente"] for c in self._casos.values()])
         super().refrescar()
 
     def a_fila(self, r):
@@ -35,8 +39,10 @@ class AgendaFrame(CrudFrame):
                 r.get("lugar") or "", r.get("prioridad") or "")
 
     def validar(self, v):
-        if not v["fecha"] or not v["hora"] or not v["caso"] or not v["actividad"]:
-            return "Fecha, hora, caso y actividad son obligatorios."
+        if not v["fecha"] or not v["hora"]:
+            return "La fecha y la hora son obligatorias."
+        if not v["caso"]:
+            return "Debes elegir un caso. Si no aparece, créalo primero en Casos."
         return None
 
     def a_cuerpo(self, v):
@@ -55,7 +61,7 @@ class AgendaFrame(CrudFrame):
             "id_caso": caso["id_caso"],
             "fecha": fecha,
             "hora": hora,
-            "actividad": v["actividad"],
+            "actividad": v["actividad"] or None,
             "lugar": v["lugar"] or None,
             "prioridad": v["prioridad"] or None,
         }

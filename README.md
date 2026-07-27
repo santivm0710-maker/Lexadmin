@@ -179,9 +179,14 @@ python main.py
 
 **Orden recomendado para cargar datos** (por las relaciones entre tablas):
 1. **Clientes** →
-2. **Casos** (se escribe el *nombre exacto* del cliente) →
-3. **Expedientes / Agenda / Información judicial** (se escribe el *número de
-   expediente* del caso).
+2. **Casos** (el cliente se elige de un **menú desplegable**) →
+3. **Expedientes / Agenda / Información judicial** (el caso se elige de un
+   **menú desplegable** por su número de expediente).
+
+**Menús desplegables:** los campos con opciones fijas (estado, prioridad,
+tipo de proceso, tipo de documento, estado OCR, actividad) y los que
+referencian a otro registro (cliente, caso) se eligen de una lista, no se
+escriben.
 
 **Validación de campos:** los campos numéricos (identificación, teléfono,
 fecha, hora) solo aceptan números/símbolos válidos, y los de solo texto

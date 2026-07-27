@@ -13,7 +13,7 @@ import api_client as api
 from styles import (
     BG, DANGER, DANGER_HOVER, INFO, INFO_HOVER, SUCCESS, SUCCESS_HOVER,
 )
-from ui_helpers import actualizar_tabla, crear_tabla, entrada, tarjeta, titulo_seccion
+from ui_helpers import actualizar_tabla, combo, crear_tabla, entrada, tarjeta, titulo_seccion
 
 
 class CrudFrame(ctk.CTkFrame):
@@ -68,8 +68,16 @@ class CrudFrame(ctk.CTkFrame):
         self.tabla.bind("<Double-1>", lambda _e: self._al_editar())
 
     def campo(self, form, clave, etiqueta, placeholder, fila, columna, tipo="libre", columnspan=1):
-        """Agrega una entrada al formulario y la registra por su clave."""
+        """Agrega una entrada de texto al formulario y la registra por su clave."""
         contenedor = entrada(form, etiqueta, placeholder, tipo)
+        return self._colocar(contenedor, clave, fila, columna, columnspan)
+
+    def desplegable(self, form, clave, etiqueta, opciones, fila, columna, con_placeholder=False, columnspan=1):
+        """Agrega un menú desplegable (combobox) al formulario."""
+        contenedor = combo(form, etiqueta, opciones, con_placeholder=con_placeholder)
+        return self._colocar(contenedor, clave, fila, columna, columnspan)
+
+    def _colocar(self, contenedor, clave, fila, columna, columnspan):
         contenedor.grid(row=fila, column=columna, columnspan=columnspan,
                         sticky="ew", padx=16, pady=(8, 10))
         self._campos[clave] = contenedor
@@ -78,12 +86,14 @@ class CrudFrame(ctk.CTkFrame):
 
     # -- utilidades para las subclases --------------------------------
     def valores(self):
-        return {clave: c.entry.get().strip() for clave, c in self._campos.items()}
+        return {clave: c.obtener() for clave, c in self._campos.items()}
 
     def poner(self, clave, valor):
-        entry = self._campos[clave].entry
-        entry.delete(0, "end")
-        entry.insert(0, "" if valor is None else str(valor))
+        self._campos[clave].asignar(valor)
+
+    def opciones(self, clave, lista):
+        """Actualiza las opciones de un desplegable (p.ej. clientes/casos)."""
+        self._campos[clave].set_opciones(lista)
 
     # -- acciones -----------------------------------------------------
     def refrescar(self):
@@ -160,7 +170,7 @@ class CrudFrame(ctk.CTkFrame):
 
     def _limpiar(self):
         for contenedor in self._campos.values():
-            contenedor.entry.delete(0, "end")
+            contenedor.limpiar()
         self._editando_id = None
         self._boton_guardar.configure(text="＋  " + self.texto_crear)
 

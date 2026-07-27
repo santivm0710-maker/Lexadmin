@@ -1,6 +1,10 @@
 import api_client as api
 from crud_frame import CrudFrame
 
+TIPOS_PROCESO = ["Civil", "Laboral", "Familia", "Penal", "Administrativo", "Pensión alimentaria", "Otro"]
+ESTADOS = ["Activo", "En revisión", "Pendiente", "Cerrado", "Finalizado"]
+PRIORIDADES = ["Alta", "Media", "Baja", "Urgente"]
+
 
 class CasosFrame(CrudFrame):
     recurso = "casos"
@@ -14,15 +18,16 @@ class CasosFrame(CrudFrame):
     texto_actualizar = "Actualizar caso"
 
     def definir_campos(self, form):
-        self.campo(form, "cliente", "Cliente asociado", "Nombre exacto del cliente", 0, 0, tipo="texto")
+        self.desplegable(form, "cliente", "Cliente asociado", [], 0, 0, con_placeholder=True)
         self.campo(form, "numero_expediente", "N.º expediente", "Ej. #245", 0, 1)
-        self.campo(form, "tipo_proceso", "Tipo de proceso", "Civil, laboral, familia...", 0, 2, tipo="texto")
-        self.campo(form, "estado", "Estado", "Activo / En revisión", 1, 0, tipo="texto")
-        self.campo(form, "prioridad", "Prioridad", "Alta / Media / Urgente", 1, 1, tipo="texto")
+        self.desplegable(form, "tipo_proceso", "Tipo de proceso", TIPOS_PROCESO, 0, 2)
+        self.desplegable(form, "estado", "Estado", ESTADOS, 1, 0)
+        self.desplegable(form, "prioridad", "Prioridad", PRIORIDADES, 1, 1)
         self.campo(form, "abogado_responsable", "Abogado responsable", "Lic. responsable", 1, 2, tipo="texto")
 
     def refrescar(self):
         self._clientes = {c["id_cliente"]: c["nombre_completo"] for c in api.listar("clientes")}
+        self.opciones("cliente", list(self._clientes.values()))
         super().refrescar()
 
     def a_fila(self, r):
@@ -31,21 +36,22 @@ class CasosFrame(CrudFrame):
                 r.get("prioridad") or "", r.get("abogado_responsable") or "")
 
     def validar(self, v):
-        obligatorios = (v["cliente"], v["numero_expediente"], v["tipo_proceso"], v["estado"], v["prioridad"])
-        if not all(obligatorios):
-            return "Cliente, expediente, tipo, estado y prioridad son obligatorios."
+        if not v["cliente"]:
+            return "Debes elegir un cliente. Si no aparece, regístralo primero en Clientes."
+        if not v["numero_expediente"]:
+            return "El número de expediente es obligatorio."
         return None
 
     def a_cuerpo(self, v):
         cliente = api.buscar_cliente_por_nombre(v["cliente"])
         if cliente is None:
-            raise ValueError(f"No existe un cliente llamado '{v['cliente']}'. Regístralo primero.")
+            raise ValueError(f"No existe un cliente llamado '{v['cliente']}'.")
         return {
             "id_cliente": cliente["id_cliente"],
             "numero_expediente": v["numero_expediente"],
-            "tipo_proceso": v["tipo_proceso"],
-            "estado": v["estado"],
-            "prioridad": v["prioridad"],
+            "tipo_proceso": v["tipo_proceso"] or None,
+            "estado": v["estado"] or None,
+            "prioridad": v["prioridad"] or None,
             "abogado_responsable": v["abogado_responsable"] or None,
         }
 
