@@ -11,7 +11,9 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
-from styles import ACCENT, ACCENT_HOVER, BORDER, CARD, FONT_FAMILY, MUTED, ROW_ALT, TEXT
+from styles import (
+    ACCENT, ACCENT_HOVER, BORDER, CARD, FONT_FAMILY, MUTED, PRIMARY, ROW_ALT, TEXT,
+)
 
 PLACEHOLDER = "— Seleccionar —"
 
@@ -73,7 +75,7 @@ def formatear_hora(valor):
 def titulo_seccion(parent, titulo, subtitulo):
     ctk.CTkLabel(
         parent, text=titulo,
-        font=ctk.CTkFont(family=FONT_FAMILY, size=22, weight="bold"), text_color=TEXT,
+        font=ctk.CTkFont(family=FONT_FAMILY, size=24, weight="bold"), text_color=TEXT,
     ).pack(anchor="w")
     ctk.CTkLabel(
         parent, text=subtitulo,
@@ -82,7 +84,7 @@ def titulo_seccion(parent, titulo, subtitulo):
 
 
 def tarjeta(parent, titulo=None):
-    frame = ctk.CTkFrame(parent, fg_color=CARD, corner_radius=14, border_width=1, border_color=BORDER)
+    frame = ctk.CTkFrame(parent, fg_color=CARD, corner_radius=16, border_width=1, border_color=BORDER)
     if titulo:
         ctk.CTkLabel(
             frame, text=titulo,
@@ -107,9 +109,12 @@ def entrada(parent, etiqueta, placeholder, tipo="libre"):
     _etiqueta(contenedor, etiqueta)
     campo = ctk.CTkEntry(
         contenedor, placeholder_text=placeholder, height=36, corner_radius=8,
-        fg_color=CARD, border_color=BORDER, font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+        fg_color=CARD, border_width=1, border_color=BORDER,
+        font=ctk.CTkFont(family=FONT_FAMILY, size=12),
     )
     campo.pack(fill="x")
+    campo.bind("<FocusIn>", lambda _e: campo.configure(border_width=2, border_color=PRIMARY))
+    campo.bind("<FocusOut>", lambda _e: campo.configure(border_width=1, border_color=BORDER))
 
     validador = _crear_validador(campo, tipo)
     if validador is not None:
@@ -185,7 +190,7 @@ def crear_tabla(parent, columnas, filas, alto=8, ids=None):
         font=(FONT_FAMILY, 10, "bold"), relief="flat", borderwidth=0,
     )
     estilo.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
-    estilo.map("Treeview", background=[("selected", ACCENT)], foreground=[("selected", "white")])
+    estilo.map("Treeview", background=[("selected", PRIMARY)], foreground=[("selected", "white")])
 
     tabla = ttk.Treeview(parent, columns=columnas, show="headings", height=alto)
     for columna in columnas:

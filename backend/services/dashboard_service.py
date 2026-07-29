@@ -11,16 +11,19 @@ def _contar(sql, params=None):
 class DashboardService:
     def resumen(self):
         total_clientes = _contar("SELECT COUNT(*) FROM clientes")
-        total_casos = _contar("SELECT COUNT(*) FROM casos")
+        casos_activos = _contar(
+            "SELECT COUNT(*) FROM casos WHERE estado NOT IN ('Cerrado', 'Finalizado') OR estado IS NULL"
+        )
         urgentes = _contar(
-            "SELECT COUNT(*) FROM casos WHERE prioridad IN ('Alta', 'Urgente')"
+            "SELECT COUNT(*) FROM casos WHERE prioridad IN ('Alta', 'Urgente') "
+            "AND (estado NOT IN ('Cerrado', 'Finalizado') OR estado IS NULL)"
         )
         audiencias = _contar("SELECT COUNT(*) FROM agenda WHERE fecha >= CURDATE()")
         expedientes = _contar("SELECT COUNT(*) FROM expedientes")
 
         stats = [
             ("Clientes registrados", str(total_clientes), "Total en el sistema", "#2563EB"),
-            ("Casos activos", str(total_casos), f"{urgentes} de prioridad alta", "#B45309"),
+            ("Casos activos", str(casos_activos), f"{urgentes} de prioridad alta", "#B45309"),
             ("Audiencias próximas", str(audiencias), "A partir de hoy", "#B91C1C"),
             ("Expedientes", str(expedientes), "Documentos digitalizados", "#15803D"),
         ]

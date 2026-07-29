@@ -1,17 +1,18 @@
 import customtkinter as ctk
 
 import api_client as api
+import icons
 from styles import BG, CARD, FONT_FAMILY, MUTED, PRIMARY, ROW_ALT, TEXT
 from ui_helpers import crear_tabla, tarjeta, titulo_seccion
 
-ICONOS = {"cliente": "☺", "caso": "⚖", "audiencia": "🗓", "expediente": "🗀"}
+ICONOS = {"cliente": "clientes", "caso": "casos", "audiencia": "agenda", "expediente": "expedientes"}
 
 
 def _icono(titulo):
-    for clave, icono in ICONOS.items():
+    for clave, nombre in ICONOS.items():
         if clave in titulo.lower():
-            return icono
-    return "●"
+            return nombre
+    return "dashboard"
 
 
 class DashboardFrame(ctk.CTkFrame):
@@ -41,10 +42,10 @@ class DashboardFrame(ctk.CTkFrame):
             insignia = ctk.CTkFrame(cabecera, width=34, height=34, corner_radius=9, fg_color=ROW_ALT)
             insignia.pack(side="left")
             insignia.pack_propagate(False)
-            ctk.CTkLabel(insignia, text=_icono(titulo), font=ctk.CTkFont(size=15), text_color=color).pack(expand=True)
+            ctk.CTkLabel(insignia, text="", image=icons.imagen(_icono(titulo), 16, color)).pack(expand=True)
             ctk.CTkLabel(cabecera, text=titulo, font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"),
                          text_color=MUTED).pack(side="left", padx=(10, 0))
-            ctk.CTkLabel(card, text=valor, font=ctk.CTkFont(family=FONT_FAMILY, size=28, weight="bold"),
+            ctk.CTkLabel(card, text=valor, font=ctk.CTkFont(family=FONT_FAMILY, size=30, weight="bold"),
                          text_color=color).pack(anchor="w", padx=18, pady=(6, 0))
             ctk.CTkLabel(card, text=nota, font=ctk.CTkFont(family=FONT_FAMILY, size=12),
                          text_color=MUTED).pack(anchor="w", padx=18, pady=(0, 16))

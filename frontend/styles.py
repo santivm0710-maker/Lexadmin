@@ -1,31 +1,35 @@
 import customtkinter as ctk
 
 # ============================================================
-# Paleta LexAdmin — sobria y profesional (estilo despacho legal)
+# Paleta LexAdmin — "Autoridad Legal Refinada" (navy + dorado,
+# tokens semánticos completos: hover, foco, bordes, estados)
 # ============================================================
-BG = "#EEF1F6"          # fondo general
+BG = "#F8FAFC"           # fondo general
 CARD = "#FFFFFF"         # tarjetas
-ROW_ALT = "#F6F8FC"      # filas alternas de tablas
+ROW_ALT = "#F1F5F9"      # filas alternas de tablas
 
-SIDEBAR = "#141C2E"      # barra lateral (azul marino profundo)
-SIDEBAR_HOVER = "#222C44"
-SIDEBAR_TEXT = "#C7CFE0"
+SIDEBAR = "#0F172A"      # barra lateral (navy casi-negro)
+SIDEBAR_HOVER = "#1E293B"
+SIDEBAR_TEXT = "#CBD5E1"
 
-PRIMARY = "#1F2A44"      # azul marino
-ACCENT = "#B08A46"       # dorado discreto (detalle elegante)
+PRIMARY = "#1E3A8A"      # azul autoridad — interactivo (foco, selección, enlaces)
+PRIMARY_HOVER = "#1B3277"
+ACCENT = "#B08A46"       # dorado discreto — solo marca (logo, ítem de nav activo)
 ACCENT_HOVER = "#9A7838"
 INFO = "#2F5BD0"         # azul para acciones secundarias
 INFO_HOVER = "#254BB0"
 
-TEXT = "#1A2233"
-MUTED = "#6B7488"
-BORDER = "#E2E6EE"
+TEXT = "#0F172A"
+MUTED = "#64748B"
+BORDER = "#CBD5E1"
 
 SUCCESS = "#1F7A46"
 SUCCESS_HOVER = "#186237"
-WARNING = "#B45309"
-DANGER = "#B23B3B"
-DANGER_HOVER = "#963030"
+WARNING = "#B45309"      # semántico (alertas) — distinto de ACCENT (marca)
+DANGER = "#DC2626"
+DANGER_HOVER = "#B91C1C"
+DISABLED = "#E2E8F0"     # fondo de botones/campos deshabilitados
+DISABLED_TEXT = "#94A3B8"
 
 FONT_FAMILY = "Segoe UI"
 

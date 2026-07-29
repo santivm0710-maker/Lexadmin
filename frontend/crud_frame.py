@@ -10,8 +10,10 @@ from tkinter import messagebox
 import customtkinter as ctk
 
 import api_client as api
+import icons
 from styles import (
-    BG, DANGER, DANGER_HOVER, INFO, INFO_HOVER, SUCCESS, SUCCESS_HOVER,
+    BG, DANGER, DANGER_HOVER, DISABLED, DISABLED_TEXT, INFO, INFO_HOVER,
+    SUCCESS, SUCCESS_HOVER,
 )
 from ui_helpers import actualizar_tabla, combo, crear_tabla, entrada, tarjeta, titulo_seccion
 
@@ -50,22 +52,46 @@ class CrudFrame(ctk.CTkFrame):
         botones = ctk.CTkFrame(form, fg_color="transparent")
         botones.grid(row=self._fila_botones, column=0, columnspan=self.columnas_form,
                      sticky="e", padx=16, pady=(4, 16))
-        ctk.CTkButton(botones, text="🗑  Eliminar", width=110, corner_radius=8,
-                      fg_color=DANGER, hover_color=DANGER_HOVER,
-                      command=self._al_eliminar).pack(side="left", padx=5)
-        ctk.CTkButton(botones, text="✎  Editar", width=100, corner_radius=8,
-                      fg_color=INFO, hover_color=INFO_HOVER,
-                      command=self._al_editar).pack(side="left", padx=5)
+        self._boton_eliminar = ctk.CTkButton(
+            botones, text="Eliminar", image=icons.imagen("eliminar", 15, "white"),
+            compound="left", width=120, corner_radius=8,
+            fg_color=DANGER, hover_color=DANGER_HOVER, command=self._al_eliminar)
+        self._boton_eliminar.pack(side="left", padx=5)
+        self._boton_editar = ctk.CTkButton(
+            botones, text="Editar", image=icons.imagen("editar", 15, "white"),
+            compound="left", width=110, corner_radius=8,
+            fg_color=INFO, hover_color=INFO_HOVER, command=self._al_editar)
+        self._boton_editar.pack(side="left", padx=5)
+        self._icono_agregar = icons.imagen("agregar", 16, "white")
+        self._icono_check = icons.imagen("check", 16, "white")
         self._boton_guardar = ctk.CTkButton(
-            botones, text="＋  " + self.texto_crear, width=160, corner_radius=8,
+            botones, text=self.texto_crear, image=self._icono_agregar,
+            compound="left", width=170, corner_radius=8,
             fg_color=SUCCESS, hover_color=SUCCESS_HOVER, command=self._al_guardar)
         self._boton_guardar.pack(side="left", padx=5)
+        self._deshabilitar_seleccion()
 
         card = tarjeta(self, self.titulo_tabla)
         card.pack(fill="both", expand=True)
         self.tabla = crear_tabla(card, self.columnas, [], 10)
         self.tabla.pack(fill="both", expand=True, padx=18, pady=(0, 18))
         self.tabla.bind("<Double-1>", lambda _e: self._al_editar())
+        self.tabla.bind("<<TreeviewSelect>>", self._al_seleccionar)
+
+    # -- estado habilitado/deshabilitado de Editar y Eliminar ---------
+    def _habilitar_seleccion(self):
+        self._boton_eliminar.configure(state="normal", fg_color=DANGER, hover_color=DANGER_HOVER, text_color="white")
+        self._boton_editar.configure(state="normal", fg_color=INFO, hover_color=INFO_HOVER, text_color="white")
+
+    def _deshabilitar_seleccion(self):
+        self._boton_eliminar.configure(state="disabled", fg_color=DISABLED, text_color=DISABLED_TEXT)
+        self._boton_editar.configure(state="disabled", fg_color=DISABLED, text_color=DISABLED_TEXT)
+
+    def _al_seleccionar(self, _evento=None):
+        if self.tabla.selection():
+            self._habilitar_seleccion()
+        else:
+            self._deshabilitar_seleccion()
 
     def campo(self, form, clave, etiqueta, placeholder, fila, columna, tipo="libre", columnspan=1):
         """Agrega una entrada de texto al formulario y la registra por su clave."""
@@ -113,6 +139,7 @@ class CrudFrame(ctk.CTkFrame):
         filas = [self.a_fila(r) for r in registros]
         ids = [r[self.pk] for r in registros]
         actualizar_tabla(self.tabla, filas, ids)
+        self._deshabilitar_seleccion()
 
     def _al_guardar(self):
         valores = self.valores()
@@ -143,7 +170,7 @@ class CrudFrame(ctk.CTkFrame):
             return
         self.llenar_formulario(registro)
         self._editando_id = registro[self.pk]
-        self._boton_guardar.configure(text="✓  " + self.texto_actualizar)
+        self._boton_guardar.configure(text=self.texto_actualizar, image=self._icono_check)
 
     def _al_eliminar(self):
         registro = self._seleccion()
@@ -172,7 +199,7 @@ class CrudFrame(ctk.CTkFrame):
         for contenedor in self._campos.values():
             contenedor.limpiar()
         self._editando_id = None
-        self._boton_guardar.configure(text="＋  " + self.texto_crear)
+        self._boton_guardar.configure(text=self.texto_crear, image=self._icono_agregar)
 
     # -- a implementar por cada módulo --------------------------------
     def definir_campos(self, form):

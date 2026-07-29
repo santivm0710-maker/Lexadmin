@@ -1,6 +1,7 @@
 import customtkinter as ctk
 
-from styles import ACCENT, ACCENT_HOVER, BG, BORDER, CARD, FONT_FAMILY, TEXT, configurar_tema
+import icons
+from styles import ACCENT, ACCENT_HOVER, BG, BORDER, CARD, FONT_FAMILY, MUTED, TEXT, configurar_tema
 from frames import (
     SidebarFrame, DashboardFrame, ClientesFrame, CasosFrame, ExpedientesFrame,
     AgendaFrame, JudicialFrame, ReportesFrame, BitacoraFrame,
@@ -59,14 +60,15 @@ class LegalDeskApp(ctk.CTk):
                                 fg_color=CARD, border_width=1, border_color=BORDER)
         buscador.grid(row=0, column=1, padx=12)
         buscador.grid_propagate(False)
-        ctk.CTkLabel(buscador, text="🔍", font=ctk.CTkFont(size=13), text_color=TEXT).pack(side="left", padx=(12, 4))
+        ctk.CTkLabel(buscador, text="", image=icons.imagen("buscar", 14, MUTED)).pack(side="left", padx=(12, 4))
         self.busqueda = ctk.CTkEntry(buscador, fg_color="transparent", border_width=0,
                                      placeholder_text="Buscar en esta sección...",
                                      font=ctk.CTkFont(family=FONT_FAMILY, size=12))
         self.busqueda.pack(side="left", fill="both", expand=True, padx=(0, 12))
         self.busqueda.bind("<KeyRelease>", self._al_buscar)
 
-        ctk.CTkButton(header, text="＋  Nuevo caso", height=38, width=140, corner_radius=8,
+        ctk.CTkButton(header, text="Nuevo caso", image=icons.imagen("agregar", 15, "white"), compound="left",
+                      height=38, width=150, corner_radius=8,
                       fg_color=ACCENT, hover_color=ACCENT_HOVER,
                       font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"),
                       command=lambda: self.mostrar_pagina("casos")).grid(row=0, column=2)
