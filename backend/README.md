@@ -22,6 +22,7 @@ backend/
 ├── entities/                # una clase por tabla (cliente, caso, expediente...)
 ├── repositories/            # SELECT/INSERT/UPDATE/DELETE de cada tabla
 ├── services/                # lógica de negocio + registro automático en bitácora
+│   └── auth_dependency.py   # valida el token JWT en las rutas protegidas
 ├── schemas/                 # validación de lo que llega por la API (pydantic)
 └── routes/                  # los endpoints de FastAPI
 ```
@@ -61,19 +62,27 @@ configuran en `config.py`.
 ## Endpoints disponibles
 
 ```text
-GET   /                     estado del backend
-GET   /conexion             prueba la conexión a MySQL
+GET   /                     estado del backend                    (público)
+GET   /conexion             prueba la conexión a MySQL             (público)
 
-GET/POST     /clientes/         PUT/DELETE /clientes/{id}
-GET/POST     /casos/            PUT/DELETE /casos/{id}
-GET/POST     /expedientes/      PUT/DELETE /expedientes/{id}
-GET/POST     /agenda/           PUT/DELETE /agenda/{id}
-GET/POST     /judicial/         PUT/DELETE /judicial/{id}
+POST  /usuarios/registro    crear cuenta                           (público)
+POST  /usuarios/login       iniciar sesión, devuelve un token JWT  (público)
+GET   /usuarios/me          valida el token actual                 (requiere sesión)
 
-GET   /bitacora/            solo lectura, se llena sola
-GET   /dashboard/           indicadores calculados en vivo
-GET   /reportes/            indicadores calculados en vivo
+GET/POST     /clientes/         PUT/DELETE /clientes/{id}          (requiere sesión)
+GET/POST     /casos/            PUT/DELETE /casos/{id}             (requiere sesión)
+GET/POST     /expedientes/      PUT/DELETE /expedientes/{id}       (requiere sesión)
+GET/POST     /agenda/           PUT/DELETE /agenda/{id}            (requiere sesión)
+GET/POST     /judicial/         PUT/DELETE /judicial/{id}          (requiere sesión)
+
+GET   /bitacora/            solo lectura, se llena sola             (requiere sesión)
+GET   /dashboard/           indicadores calculados en vivo          (requiere sesión)
+GET   /reportes/            indicadores calculados en vivo          (requiere sesión)
 ```
+
+Las rutas que requieren sesión validan un JWT enviado en el header
+`Authorization: Bearer <token>`. El token se obtiene desde `/usuarios/login`
+y dura 8 horas (configurable en `backend/config.py` con `jwt_expira_minutos`).
 
 Todos están documentados automáticamente en `/docs` una vez que el backend
 está corriendo.
@@ -101,8 +110,6 @@ uvicorn backend.main:app --reload
 
 Documentación interactiva en `http://127.0.0.1:8000/docs`.
 
-## Estado actual
-
 Lo que ya tiene:
 
 - Arquitectura por capas completa (entidades, repositorios, servicios, rutas).
@@ -111,9 +118,10 @@ Lo que ya tiene:
   formulario.
 - Bitácora automática y dashboard/reportes calculados en vivo.
 - Manejo de errores de MySQL traducido a respuestas HTTP claras (409, 400...).
+- Autenticación por JWT: el login emite un token y el resto de la API lo exige.
 
 Lo que falta / posibles mejoras a futuro:
 
-- Autenticación y manejo de usuarios/roles.
+- Autorización por roles (el campo `rol` existe pero aún no restringe acciones).
 - Carga real de archivos PDF y OCR de expedientes.
 - Un ORM (SQLAlchemy) y migraciones (Alembic), si el proyecto crece.

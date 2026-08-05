@@ -37,8 +37,7 @@ Lexadmin/
 │  │  └─ lexadmin.sql         # crea la base de datos y las tablas
 │  ├─ entities/                # cómo luce cada tabla (dataclasses)
 │  ├─ repositories/            # el SELECT/INSERT/UPDATE/DELETE de cada tabla
-├── services/                # lógica de negocio + registro automático en bitácora
-│   └── auth_dependency.py   # valida el token JWT en las rutas protegidas
+├── services/                # lógica de negocio 
 │  ├─ schemas/                 # validación de lo que llega por la API
 │  └─ routes/                  # los endpoints
 └─ frontend/
@@ -193,26 +192,22 @@ Cada vez que creas, editas o borras algo, queda anotado solo en la
 
 ## Endpoints de la API
 
-| Método | Ruta | Qué hace | Requiere sesión |
-|---|---|---|---|
-| POST | `/usuarios/registro` | crear cuenta | No |
-| POST | `/usuarios/login` | iniciar sesión (devuelve un token) | No |
-| GET | `/usuarios/me` | valida el token actual | Sí |
-| GET / POST | `/clientes/` | listar / crear clientes | Sí |
-| PUT / DELETE | `/clientes/{id}` | editar / eliminar un cliente | Sí |
-| GET / POST | `/casos/` | listar / crear casos | Sí |
-| PUT / DELETE | `/casos/{id}` | editar / eliminar un caso | Sí |
-| GET / POST | `/expedientes/` | listar / crear expedientes | Sí |
-| PUT / DELETE | `/expedientes/{id}` | editar / eliminar un expediente | Sí |
-| GET / POST | `/agenda/` | listar / crear eventos | Sí |
-| PUT / DELETE | `/agenda/{id}` | editar / eliminar un evento | Sí |
-| GET / POST | `/judicial/` | listar / crear información judicial | Sí |
-| PUT / DELETE | `/judicial/{id}` | editar / eliminar información judicial | Sí |
-| GET | `/bitacora/` | historial de auditoría (solo lectura) | Sí |
-| GET | `/dashboard/` | indicadores del panel principal | Sí |
-| GET | `/reportes/` | indicadores y resumen | Sí |
-| GET | `/ ` | estado del backend | No |
-| GET | `/conexion` | prueba que la API se conecte a MySQL | No |
+| Método | Ruta | Qué hace |
+|---|---|---|
+| GET / POST | `/clientes/` | listar / crear clientes |
+| PUT / DELETE | `/clientes/{id}` | editar / eliminar un cliente |
+| GET / POST | `/casos/` | listar / crear casos |
+| PUT / DELETE | `/casos/{id}` | editar / eliminar un caso |
+| GET / POST | `/expedientes/` | listar / crear expedientes |
+| PUT / DELETE | `/expedientes/{id}` | editar / eliminar un expediente |
+| GET / POST | `/agenda/` | listar / crear eventos |
+| PUT / DELETE | `/agenda/{id}` | editar / eliminar un evento |
+| GET / POST | `/judicial/` | listar / crear información judicial |
+| PUT / DELETE | `/judicial/{id}` | editar / eliminar información judicial |
+| GET | `/bitacora/` | historial de auditoría (solo lectura) |
+| GET | `/dashboard/` | indicadores del panel principal |
+| GET | `/reportes/` | indicadores y resumen |
+| GET | `/conexion` | prueba que la API se conecte a MySQL |
 
 Las rutas marcadas con sesión piden un header `Authorization: Bearer <token>`,
 que el frontend maneja solo. Para probarlas manualmente desde `/docs`, hay
