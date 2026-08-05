@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend.schemas.common import ApiResponse
 from backend.schemas.requests import UsuarioLogin, UsuarioRegistro
+from backend.services import seguridad
+from backend.services.auth_dependency import obtener_usuario_actual
 from backend.services.usuario_service import UsuarioService
 
+# Sin `dependencies=[Depends(obtener_usuario_actual)]` a propósito: registro y
+# login tienen que ser accesibles SIN estar autenticado todavía (para eso son).
 router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 service = UsuarioService()
 
