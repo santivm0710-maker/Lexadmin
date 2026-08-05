@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from backend.schemas.common import ApiResponse
 from backend.services.reportes_service import ReportesService
+from backend.services.auth_dependency import obtener_usuario_actual
 
-router = APIRouter(prefix="/reportes", tags=["reportes"])
+router = APIRouter(prefix="/reportes", tags=["reportes"], dependencies=[Depends(obtener_usuario_actual)])
 service = ReportesService()
 
 

@@ -1,5 +1,6 @@
 import customtkinter as ctk
 
+import api_client
 import icons
 from styles import ACCENT, ACCENT_HOVER, BG, BORDER, CARD, FONT_FAMILY, MUTED, TEXT, configurar_tema
 from frames import (
@@ -107,6 +108,7 @@ class LegalDeskApp(ctk.CTk):
             self.pagina_actual.filtrar(texto)
 
     def _cerrar_sesion(self):
+        api_client.cerrar_sesion()  # olvida el token; la próxima pantalla de login pedirá uno nuevo
         self.solicito_cerrar_sesion = True
         self.destroy()
 

@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from backend.schemas.common import ApiResponse
 from backend.services.bitacora_service import BitacoraService
+from backend.services.auth_dependency import obtener_usuario_actual
 
-router = APIRouter(prefix="/bitacora", tags=["bitacora"])
+router = APIRouter(prefix="/bitacora", tags=["bitacora"], dependencies=[Depends(obtener_usuario_actual)])
 service = BitacoraService()
 
 

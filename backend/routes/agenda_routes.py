@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend.schemas.common import ApiResponse
 from backend.schemas.requests import AgendaCreate
+from backend.services.auth_dependency import obtener_usuario_actual
 from backend.services.agenda_service import AgendaService
 
-router = APIRouter(prefix="/agenda", tags=["agenda"])
+router = APIRouter(prefix="/agenda", tags=["agenda"], dependencies=[Depends(obtener_usuario_actual)])
 service = AgendaService()
 
 

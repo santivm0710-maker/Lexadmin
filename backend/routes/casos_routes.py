@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend.schemas.common import ApiResponse
 from backend.schemas.requests import CasoCreate
+from backend.services.auth_dependency import obtener_usuario_actual
 from backend.services.caso_service import CasoService
 
-router = APIRouter(prefix="/casos", tags=["casos"])
+router = APIRouter(prefix="/casos", tags=["casos"], dependencies=[Depends(obtener_usuario_actual)])
 service = CasoService()
 
 

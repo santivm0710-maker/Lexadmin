@@ -4,3 +4,4 @@ pydantic
 pydantic-settings
 python-dotenv
 mysql-connector-python==9.4.0
+PyJWT==2.9.0

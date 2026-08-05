@@ -14,6 +14,18 @@ from urllib.request import Request, urlopen
 API_BASE_URL = "http://127.0.0.1:8000"
 TIMEOUT = 4
 
+# Token de la sesión activa. Se guarda en memoria del proceso (la app es de
+# un solo usuario a la vez); lo llena `iniciar sesion` y lo vacía
+# `cerrar sesion`. Todas las peticiones lo adjuntan automáticamente, así que
+# el resto del frontend (frames, crud_frame, etc.) no tiene que preocuparse
+# por él: siguen llamando a listar/crear/actualizar/eliminar como siempre.
+
+_token = None
+
+def cerrar_sesion():
+    """Olvida el token actual. Llamarlo al cerrar sesión o si expiró."""
+    global _token
+    _token = None
 
 def _pedir(endpoint, metodo="GET", cuerpo=None):
     """Realiza una petición y devuelve (ok, mensaje, data)."""
@@ -21,6 +33,8 @@ def _pedir(endpoint, metodo="GET", cuerpo=None):
     cabeceras = {"Accept": "application/json"}
     if datos is not None:
         cabeceras["Content-Type"] = "application/json"
+    if _token:
+        cabeceras["Authorization"] = f"Bearer {_token}"
     peticion = Request(f"{API_BASE_URL}{endpoint}", data=datos, method=metodo, headers=cabeceras)
 
     try:
@@ -32,6 +46,12 @@ def _pedir(endpoint, metodo="GET", cuerpo=None):
             detalle = json.loads(error.read().decode("utf-8")).get("detail", "")
         except (json.JSONDecodeError, OSError):
             detalle = f"Error HTTP {error.code}."
+        if error.code == 401:
+            # El token venció o es inválido: no tiene sentido seguir
+            # mandándolo, así que se limpia para que quede claro que hay
+            # que volver a iniciar sesión.
+            cerrar_sesion()
+            detalle = detalle or "Tu sesión expiró. Inicia sesión de nuevo."
         return False, detalle, None
     except (URLError, TimeoutError, OSError):
         return False, "No se pudo conectar con el backend. Verifica que esté corriendo.", None
@@ -65,7 +85,11 @@ def registrar_usuario(cuerpo):
 
 
 def iniciar_sesion(cuerpo):
-    return _pedir("/usuarios/login", "POST", cuerpo)
+    global _token
+    ok, mensaje, data = _pedir("/usuarios/login", "POST", cuerpo)
+    if ok and data:
+        _token = data.get("token")
+    return ok, mensaje, data
 
 
 # ------------------------------------------------------------------

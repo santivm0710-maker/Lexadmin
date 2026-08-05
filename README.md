@@ -37,7 +37,8 @@ Lexadmin/
 │  │  └─ lexadmin.sql         # crea la base de datos y las tablas
 │  ├─ entities/                # cómo luce cada tabla (dataclasses)
 │  ├─ repositories/            # el SELECT/INSERT/UPDATE/DELETE de cada tabla
-│  ├─ services/                # reglas de negocio + registro en bitácora
+├── services/                # lógica de negocio + registro automático en bitácora
+│   └── auth_dependency.py   # valida el token JWT en las rutas protegidas
 │  ├─ schemas/                 # validación de lo que llega por la API
 │  └─ routes/                  # los endpoints
 └─ frontend/
@@ -113,6 +114,20 @@ database_user = "root"
 database_password = ""     # tu contraseña, si tienes una
 ```
 
+**5. Configura la clave del JWT**
+
+El backend firma las sesiones con una clave secreta. Para desarrollo hay una
+por defecto, pero es buena práctica definir la tuya en un archivo `.env` en
+la raíz del proyecto (junto a `backend/` y `frontend/`):
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Copia lo que imprima ese comando a un archivo `.env`: JWT_SECRET_KEY="lo que imprima el comando de arriba"
+
+Este archivo nunca se sube al repositorio así que cada quien clone el proyecto debe de crear el suyo.
+
 ## Cómo levantar el proyecto
 
 Hay que tener tres cosas prendidas: MySQL, el backend y el frontend.
@@ -178,22 +193,30 @@ Cada vez que creas, editas o borras algo, queda anotado solo en la
 
 ## Endpoints de la API
 
-| Método | Ruta | Qué hace |
-|---|---|---|
-| GET / POST | `/clientes/` | listar / crear clientes |
-| PUT / DELETE | `/clientes/{id}` | editar / eliminar un cliente |
-| GET / POST | `/casos/` | listar / crear casos |
-| PUT / DELETE | `/casos/{id}` | editar / eliminar un caso |
-| GET / POST | `/expedientes/` | listar / crear expedientes |
-| PUT / DELETE | `/expedientes/{id}` | editar / eliminar un expediente |
-| GET / POST | `/agenda/` | listar / crear eventos |
-| PUT / DELETE | `/agenda/{id}` | editar / eliminar un evento |
-| GET / POST | `/judicial/` | listar / crear información judicial |
-| PUT / DELETE | `/judicial/{id}` | editar / eliminar información judicial |
-| GET | `/bitacora/` | historial de auditoría (solo lectura) |
-| GET | `/dashboard/` | indicadores del panel principal |
-| GET | `/reportes/` | indicadores y resumen |
-| GET | `/conexion` | prueba que la API se conecte a MySQL |
+| Método | Ruta | Qué hace | Requiere sesión |
+|---|---|---|---|
+| POST | `/usuarios/registro` | crear cuenta | No |
+| POST | `/usuarios/login` | iniciar sesión (devuelve un token) | No |
+| GET | `/usuarios/me` | valida el token actual | Sí |
+| GET / POST | `/clientes/` | listar / crear clientes | Sí |
+| PUT / DELETE | `/clientes/{id}` | editar / eliminar un cliente | Sí |
+| GET / POST | `/casos/` | listar / crear casos | Sí |
+| PUT / DELETE | `/casos/{id}` | editar / eliminar un caso | Sí |
+| GET / POST | `/expedientes/` | listar / crear expedientes | Sí |
+| PUT / DELETE | `/expedientes/{id}` | editar / eliminar un expediente | Sí |
+| GET / POST | `/agenda/` | listar / crear eventos | Sí |
+| PUT / DELETE | `/agenda/{id}` | editar / eliminar un evento | Sí |
+| GET / POST | `/judicial/` | listar / crear información judicial | Sí |
+| PUT / DELETE | `/judicial/{id}` | editar / eliminar información judicial | Sí |
+| GET | `/bitacora/` | historial de auditoría (solo lectura) | Sí |
+| GET | `/dashboard/` | indicadores del panel principal | Sí |
+| GET | `/reportes/` | indicadores y resumen | Sí |
+| GET | `/ ` | estado del backend | No |
+| GET | `/conexion` | prueba que la API se conecte a MySQL | No |
+
+Las rutas marcadas con sesión piden un header `Authorization: Bearer <token>`,
+que el frontend maneja solo. Para probarlas manualmente desde `/docs`, hay
+que iniciar sesión ahí primero y usar el botón **Authorize**.
 
 ## Qué se hizo sobre el prototipo original
 
@@ -222,6 +245,13 @@ botones que antes no hacían nada (nuevo caso, buscador, cerrar sesión,
 editar/eliminar por fila). Y se le dio una vuelta al diseño para que se
 viera más sobrio y acorde a un despacho de abogados.
 
+**Autenticación.** El login ahora emite un token JWT en vez de solo devolver
+los datos del usuario. Ese token se exige en el resto de la API (todo menos
+registro, login y la verificación de conexión), así que ya no se puede leer
+ni modificar información sin haber iniciado sesión antes. El frontend lo
+maneja de forma transparente: lo guarda al entrar y lo adjunta en cada
+petición sin que cada pantalla tenga que preocuparse por eso.
+
 ## Problemas comunes
 
 **`Can't connect to MySQL server`** — MySQL está apagado, enciéndelo desde
@@ -239,6 +269,14 @@ corriendo y que la base de datos se haya creado (pasos de instalación 3 y
 
 **`ModuleNotFoundError`** — te faltó activar el entorno virtual o instalar
 los `requirements.txt`.
+
+**`No autenticado` / `La sesión expiró`** — el token venció (dura 8 horas) o
+el backend se reinició con una clave JWT distinta. Cierra sesión y vuelve a
+iniciar sesión.
+
+**`Not Found` al iniciar sesión desde la app** — revisa que
+`API_BASE_URL` en `frontend/api_client.py` sea exactamente
+`http://127.0.0.1:8000`, sin una `/` al final.
 
 ---
 

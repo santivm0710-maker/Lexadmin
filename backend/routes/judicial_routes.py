@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend.schemas.common import ApiResponse
 from backend.schemas.requests import JudicialCreate
+from backend.services.auth_dependency import obtener_usuario_actual
 from backend.services.judicial_service import JudicialService
 
-router = APIRouter(prefix="/judicial", tags=["judicial"])
+router = APIRouter(prefix="/judicial", tags=["judicial"], dependencies=[Depends(obtener_usuario_actual)])
 service = JudicialService()
 
 
