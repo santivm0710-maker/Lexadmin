@@ -5,8 +5,19 @@
 -- que toda la aplicación (backend + frontend) funcione contra una
 -- base de datos MySQL real.
 --
+-- El script solo crea la estructura: no inserta ningún dato.
+--
+-- Es seguro ejecutarlo varias veces: crea únicamente lo que falte y
+-- no toca las tablas que ya existan ni la información guardada. Por
+-- eso sirve tanto para instalar desde cero como para agregar una
+-- tabla nueva a una base que ya está en uso.
+--
 -- Ejecutar con:
 --   mysql -u root < backend/database/lexadmin.sql
+--
+-- Nota: si se cambia la estructura de una tabla que ya existe, este
+-- script no la modifica; ese cambio hay que aplicarlo con un ALTER
+-- TABLE aparte.
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS lexadmin
@@ -15,20 +26,25 @@ CREATE DATABASE IF NOT EXISTS lexadmin
 
 USE lexadmin;
 
--- Se eliminan en orden inverso a las dependencias (llaves foráneas).
-DROP TABLE IF EXISTS bitacora;
-DROP TABLE IF EXISTS agenda;
-DROP TABLE IF EXISTS expedientes;
-DROP TABLE IF EXISTS informacion_judicial;
-DROP TABLE IF EXISTS casos;
-DROP TABLE IF EXISTS clientes;
-DROP TABLE IF EXISTS usuarios;
+-- ------------------------------------------------------------
+-- ¿Querés empezar de cero y borrar TODO lo guardado?
+-- Quitá los guiones de las líneas siguientes. CUIDADO: esto
+-- elimina de forma permanente clientes, casos, expedientes,
+-- agenda, bitácora y usuarios. No hay forma de recuperarlos.
+-- ------------------------------------------------------------
+-- DROP TABLE IF EXISTS bitacora;
+-- DROP TABLE IF EXISTS agenda;
+-- DROP TABLE IF EXISTS expedientes;
+-- DROP TABLE IF EXISTS informacion_judicial;
+-- DROP TABLE IF EXISTS casos;
+-- DROP TABLE IF EXISTS clientes;
+-- DROP TABLE IF EXISTS usuarios;
 
 
 -- ==========================================
 -- USUARIOS  (acceso a la aplicación)
 -- ==========================================
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario      INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(150) NOT NULL,
     correo          VARCHAR(120) NOT NULL UNIQUE,
@@ -41,7 +57,7 @@ CREATE TABLE usuarios (
 -- ==========================================
 -- CLIENTES
 -- ==========================================
-CREATE TABLE clientes (
+CREATE TABLE IF NOT EXISTS clientes (
     id_cliente      INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(150) NOT NULL,
     identificacion  VARCHAR(30)  NOT NULL UNIQUE,
@@ -54,7 +70,7 @@ CREATE TABLE clientes (
 -- ==========================================
 -- CASOS
 -- ==========================================
-CREATE TABLE casos (
+CREATE TABLE IF NOT EXISTS casos (
     id_caso             INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente          INT NOT NULL,
     numero_expediente   VARCHAR(60) NOT NULL UNIQUE,
@@ -72,7 +88,7 @@ CREATE TABLE casos (
 -- ==========================================
 -- INFORMACIÓN JUDICIAL  (una por caso)
 -- ==========================================
-CREATE TABLE informacion_judicial (
+CREATE TABLE IF NOT EXISTS informacion_judicial (
     id_info_judicial       INT AUTO_INCREMENT PRIMARY KEY,
     id_caso                INT NOT NULL UNIQUE,
     juzgado                VARCHAR(150),
@@ -86,7 +102,7 @@ CREATE TABLE informacion_judicial (
 -- ==========================================
 -- EXPEDIENTES  (documentos digitalizados)
 -- ==========================================
-CREATE TABLE expedientes (
+CREATE TABLE IF NOT EXISTS expedientes (
     id_expediente    INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente       INT NOT NULL,
     id_caso          INT NOT NULL,
@@ -103,7 +119,7 @@ CREATE TABLE expedientes (
 -- ==========================================
 -- AGENDA  (audiencias y actividades)
 -- ==========================================
-CREATE TABLE agenda (
+CREATE TABLE IF NOT EXISTS agenda (
     id_agenda     INT AUTO_INCREMENT PRIMARY KEY,
     id_caso       INT NOT NULL,
     fecha         DATE NOT NULL,
@@ -119,7 +135,7 @@ CREATE TABLE agenda (
 -- ==========================================
 -- BITÁCORA  (registro de auditoría automático)
 -- ==========================================
-CREATE TABLE bitacora (
+CREATE TABLE IF NOT EXISTS bitacora (
     id_bitacora INT AUTO_INCREMENT PRIMARY KEY,
     fecha       DATE,
     hora        TIME,
