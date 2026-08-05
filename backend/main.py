@@ -22,6 +22,7 @@ from backend.routes import (
     expedientes_router,
     judicial_router,
     reportes_router,
+    usuarios_router,
 )
 from backend.schemas.common import ApiResponse
 
@@ -49,6 +50,7 @@ async def mysql_error_handler(request: Request, exc: mysql.connector.Error):
     return JSONResponse(status_code=status_code, content={"detail": detail})
 
 
+app.include_router(usuarios_router)
 app.include_router(clientes_router)
 app.include_router(casos_router)
 app.include_router(expedientes_router)

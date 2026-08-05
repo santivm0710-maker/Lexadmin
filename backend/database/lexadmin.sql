@@ -22,6 +22,20 @@ DROP TABLE IF EXISTS expedientes;
 DROP TABLE IF EXISTS informacion_judicial;
 DROP TABLE IF EXISTS casos;
 DROP TABLE IF EXISTS clientes;
+DROP TABLE IF EXISTS usuarios;
+
+
+-- ==========================================
+-- USUARIOS  (acceso a la aplicación)
+-- ==========================================
+CREATE TABLE usuarios (
+    id_usuario      INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_completo VARCHAR(150) NOT NULL,
+    correo          VARCHAR(120) NOT NULL UNIQUE,
+    password_hash   VARCHAR(255) NOT NULL,
+    rol             VARCHAR(50) DEFAULT 'Abogado',
+    fecha_registro  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 -- ==========================================

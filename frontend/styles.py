@@ -25,6 +25,8 @@ BORDER = "#CBD5E1"
 
 SUCCESS = "#1F7A46"
 SUCCESS_HOVER = "#186237"
+SUCCESS_BG = "#F0FDF4"   # fondo de avisos de éxito
+DANGER_BG = "#FEF2F2"    # fondo de avisos de error
 WARNING = "#B45309"      # semántico (alertas) — distinto de ACCENT (marca)
 DANGER = "#DC2626"
 DANGER_HOVER = "#B91C1C"
@@ -32,6 +34,7 @@ DISABLED = "#E2E8F0"     # fondo de botones/campos deshabilitados
 DISABLED_TEXT = "#94A3B8"
 
 FONT_FAMILY = "Segoe UI"
+FONT_SERIF = "Georgia"   # solo para la marca: transmite el tono formal de un despacho legal
 
 
 def configurar_tema():

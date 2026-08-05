@@ -15,13 +15,16 @@ TITULOS = {
 
 
 class LegalDeskApp(ctk.CTk):
-    def __init__(self):
+    def __init__(self, usuario=None):
         configurar_tema()
         super().__init__()
+        icons.imagen.cache_clear()  # los íconos cacheados pertenecían a una raíz de Tk ya destruida
         self.title("LexAdmin | Gestión de despacho legal")
         self.geometry("1300x800")
         self.minsize(1120, 700)
         self.configure(fg_color=BG)
+        self.usuario = usuario
+        self.solicito_cerrar_sesion = False
         self.pagina_actual = None
         self._crear_layout()
         self._crear_paginas()
@@ -31,7 +34,7 @@ class LegalDeskApp(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self.sidebar = SidebarFrame(self, self.mostrar_pagina)
+        self.sidebar = SidebarFrame(self, self.mostrar_pagina, self.usuario, self._cerrar_sesion)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
         self.main = ctk.CTkFrame(self, fg_color=BG, corner_radius=0)
@@ -102,6 +105,10 @@ class LegalDeskApp(ctk.CTk):
         texto = self.busqueda.get()
         if hasattr(self.pagina_actual, "filtrar"):
             self.pagina_actual.filtrar(texto)
+
+    def _cerrar_sesion(self):
+        self.solicito_cerrar_sesion = True
+        self.destroy()
 
 
 if __name__ == "__main__":

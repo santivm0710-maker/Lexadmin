@@ -4,3 +4,4 @@ from .caso import Caso
 from .cliente import Cliente
 from .expediente import Expediente
 from .judicial import InformacionJudicial
+from .usuario import Usuario

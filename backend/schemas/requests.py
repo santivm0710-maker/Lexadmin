@@ -41,6 +41,17 @@ class ExpedienteCreate(BaseModel):
     estado_ocr: Optional[str] = "Pendiente"
 
 
+class UsuarioRegistro(BaseModel):
+    nombre_completo: str
+    correo: str
+    password: str
+
+
+class UsuarioLogin(BaseModel):
+    correo: str
+    password: str
+
+
 class AgendaCreate(BaseModel):
     id_caso: int
     fecha: date

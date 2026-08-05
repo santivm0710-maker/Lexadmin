@@ -58,6 +58,17 @@ def eliminar(recurso, item_id):
 
 
 # ------------------------------------------------------------------
+# Autenticación
+# ------------------------------------------------------------------
+def registrar_usuario(cuerpo):
+    return _pedir("/usuarios/registro", "POST", cuerpo)
+
+
+def iniciar_sesion(cuerpo):
+    return _pedir("/usuarios/login", "POST", cuerpo)
+
+
+# ------------------------------------------------------------------
 # Consultas de apoyo
 # ------------------------------------------------------------------
 def backend_disponible():

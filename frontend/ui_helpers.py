@@ -12,7 +12,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from styles import (
-    ACCENT, ACCENT_HOVER, BORDER, CARD, FONT_FAMILY, MUTED, PRIMARY, ROW_ALT, TEXT,
+    ACCENT, ACCENT_HOVER, BORDER, CARD, FONT_FAMILY, FONT_SERIF, MUTED, PRIMARY, ROW_ALT, TEXT,
 )
 
 PLACEHOLDER = "— Seleccionar —"
@@ -94,6 +94,22 @@ def tarjeta(parent, titulo=None):
     return frame
 
 
+def insignia_marca(parent, tamano=38, fuente=18):
+    """Distintivo dorado con el monograma del despacho.
+
+    Se usa igual en la ventana de acceso y en la barra lateral para que la
+    marca sea la misma en toda la aplicación.
+    """
+    insignia = ctk.CTkFrame(parent, width=tamano, height=tamano,
+                            corner_radius=tamano // 3, fg_color=ACCENT)
+    insignia.pack_propagate(False)
+    ctk.CTkLabel(
+        insignia, text="L", text_color="white",
+        font=ctk.CTkFont(family=FONT_SERIF, size=fuente, weight="bold"),
+    ).pack(expand=True)
+    return insignia
+
+
 def _etiqueta(contenedor, texto):
     ctk.CTkLabel(
         contenedor, text=texto.upper(),
@@ -104,13 +120,13 @@ def _etiqueta(contenedor, texto):
 # ------------------------------------------------------------------
 # Campos de formulario (misma interfaz: obtener / asignar / limpiar)
 # ------------------------------------------------------------------
-def entrada(parent, etiqueta, placeholder, tipo="libre"):
+def entrada(parent, etiqueta, placeholder, tipo="libre", mostrar=""):
     contenedor = ctk.CTkFrame(parent, fg_color="transparent")
     _etiqueta(contenedor, etiqueta)
     campo = ctk.CTkEntry(
         contenedor, placeholder_text=placeholder, height=36, corner_radius=8,
         fg_color=CARD, border_width=1, border_color=BORDER,
-        font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+        font=ctk.CTkFont(family=FONT_FAMILY, size=12), show=mostrar,
     )
     campo.pack(fill="x")
     campo.bind("<FocusIn>", lambda _e: campo.configure(border_width=2, border_color=PRIMARY))
@@ -128,6 +144,7 @@ def entrada(parent, etiqueta, placeholder, tipo="libre"):
     contenedor.obtener = lambda: campo.get().strip()
     contenedor.asignar = asignar
     contenedor.limpiar = lambda: campo.delete(0, "end")
+    contenedor.campo = campo  # acceso al widget interno (atajos de teclado, validación al salir)
     return contenedor
 
 

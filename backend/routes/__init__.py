@@ -6,3 +6,4 @@ from .dashboard_routes import router as dashboard_router
 from .expedientes_routes import router as expedientes_router
 from .judicial_routes import router as judicial_router
 from .reportes_routes import router as reportes_router
+from .usuarios_routes import router as usuarios_router

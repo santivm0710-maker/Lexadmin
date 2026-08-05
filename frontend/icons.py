@@ -32,7 +32,10 @@ GLIFOS = {
     "agregar": "\uE710",
     "check": "\uE73E",
     "salir": "\uE7E8",
-    "logo": "\u2696",
+    "ver": "\uE7B3",
+    "ocultar": "\uED1A",
+    "correo": "\uE715",
+    "escudo": "\uEA18",
 }
 
 
