@@ -92,10 +92,11 @@ class CrudFrame(ctk.CTkFrame):
             self._habilitar_seleccion()
         else:
             self._deshabilitar_seleccion()
+            self._limpiar()
 
-    def campo(self, form, clave, etiqueta, placeholder, fila, columna, tipo="libre", columnspan=1):
+    def campo(self, form, clave, etiqueta, placeholder, fila, columna, tipo="libre", columnspan=1, estado="normal"):
         """Agrega una entrada de texto al formulario y la registra por su clave."""
-        contenedor = entrada(form, etiqueta, placeholder, tipo)
+        contenedor = entrada(form, etiqueta, placeholder, tipo, estado=estado)
         return self._colocar(contenedor, clave, fila, columna, columnspan)
 
     def desplegable(self, form, clave, etiqueta, opciones, fila, columna, con_placeholder=False, columnspan=1):

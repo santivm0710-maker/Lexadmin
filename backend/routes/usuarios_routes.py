@@ -32,4 +32,10 @@ def iniciar_sesion(datos: UsuarioLogin):
     usuario = service.login(datos)
     if usuario is None:
         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos.")
-    return ApiResponse(success=True, message="Sesión iniciada correctamente.", data=_publico(usuario))
+    token = seguridad.crear_token(usuario)
+
+    data = _publico(usuario)
+    data["token"] = token
+
+        
+    return ApiResponse(success=True, message="Sesión iniciada correctamente.", data= data)

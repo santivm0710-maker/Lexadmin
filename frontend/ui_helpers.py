@@ -120,30 +120,38 @@ def _etiqueta(contenedor, texto):
 # ------------------------------------------------------------------
 # Campos de formulario (misma interfaz: obtener / asignar / limpiar)
 # ------------------------------------------------------------------
-def entrada(parent, etiqueta, placeholder, tipo="libre", mostrar=""):
+def entrada(parent, etiqueta, placeholder, tipo="libre", mostrar="", estado="normal"):
     contenedor = ctk.CTkFrame(parent, fg_color="transparent")
     _etiqueta(contenedor, etiqueta)
     campo = ctk.CTkEntry(
         contenedor, placeholder_text=placeholder, height=36, corner_radius=8,
         fg_color=CARD, border_width=1, border_color=BORDER,
-        font=ctk.CTkFont(family=FONT_FAMILY, size=12), show=mostrar,
+        font=ctk.CTkFont(family=FONT_FAMILY, size=12), show=mostrar, state=estado,
     )
     campo.pack(fill="x")
     campo.bind("<FocusIn>", lambda _e: campo.configure(border_width=2, border_color=PRIMARY))
     campo.bind("<FocusOut>", lambda _e: campo.configure(border_width=1, border_color=BORDER))
 
     validador = _crear_validador(campo, tipo)
-    if validador is not None:
+    if validador is not None and estado == "normal":
         campo._entry.configure(validate="key", validatecommand=(validador, "%P"))
 
     def asignar(valor):
+        campo.configure(state="normal")
         campo.delete(0, "end")
         if valor not in (None, ""):
             campo.insert(0, str(valor))
+        campo.configure(state=estado)
 
     contenedor.obtener = lambda: campo.get().strip()
     contenedor.asignar = asignar
-    contenedor.limpiar = lambda: campo.delete(0, "end")
+
+    def limpiar():
+        campo.configure(state="normal")
+        campo.delete(0, "end")
+        campo.configure(state=estado)
+
+    contenedor.limpiar = limpiar
     contenedor.campo = campo  # acceso al widget interno (atajos de teclado, validación al salir)
     return contenedor
 

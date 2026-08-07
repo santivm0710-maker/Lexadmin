@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+from tempfile import NamedTemporaryFile
+from typing import Optional
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from backend.schemas.common import ApiResponse
 from backend.schemas.requests import ExpedienteCreate
@@ -15,13 +19,69 @@ def listar_expedientes():
 
 
 @router.post("/", response_model=ApiResponse)
-def crear_expediente(expediente: ExpedienteCreate):
-    return ApiResponse(success=True, message="Expediente creado correctamente.", data=service.crear(expediente))
+async def crear_expediente(
+    id_cliente: int = Form(...),
+    id_caso: int = Form(...),
+    nombre_documento: Optional[str] = Form(None),
+    tipo_documento: Optional[str] = Form(None),
+    estado_ocr: Optional[str] = Form("Pendiente"),
+    archivo: Optional[UploadFile] = File(None),
+):
+    expediente = ExpedienteCreate(
+        id_cliente=id_cliente,
+        id_caso=id_caso,
+        nombre_documento=nombre_documento,
+        tipo_documento=tipo_documento,
+        estado_ocr=estado_ocr,
+    )
+
+    archivo_path = None
+    if archivo is not None and getattr(archivo, "filename", None):
+        with NamedTemporaryFile("wb", suffix=".pdf", delete=False) as tmp:
+            contenido = await archivo.read()
+            tmp.write(contenido)
+            archivo_path = tmp.name
+
+    try:
+        resultado = service.crear(expediente, archivo_pdf=archivo_path)
+    finally:
+        if archivo_path and os.path.exists(archivo_path):
+            os.remove(archivo_path)
+
+    return ApiResponse(success=True, message="Expediente creado correctamente.", data=resultado)
 
 
 @router.put("/{id_expediente}", response_model=ApiResponse)
-def actualizar_expediente(id_expediente: int, expediente: ExpedienteCreate):
-    resultado = service.actualizar(id_expediente, expediente)
+async def actualizar_expediente(
+    id_expediente: int,
+    id_cliente: int = Form(...),
+    id_caso: int = Form(...),
+    nombre_documento: Optional[str] = Form(None),
+    tipo_documento: Optional[str] = Form(None),
+    estado_ocr: Optional[str] = Form("Pendiente"),
+    archivo: Optional[UploadFile] = File(None),
+):
+    expediente = ExpedienteCreate(
+        id_cliente=id_cliente,
+        id_caso=id_caso,
+        nombre_documento=nombre_documento,
+        tipo_documento=tipo_documento,
+        estado_ocr=estado_ocr,
+    )
+
+    archivo_path = None
+    if archivo is not None and getattr(archivo, "filename", None):
+        with NamedTemporaryFile("wb", suffix=".pdf", delete=False) as tmp:
+            contenido = await archivo.read()
+            tmp.write(contenido)
+            archivo_path = tmp.name
+
+    try:
+        resultado = service.actualizar(id_expediente, expediente, archivo_pdf=archivo_path)
+    finally:
+        if archivo_path and os.path.exists(archivo_path):
+            os.remove(archivo_path)
+
     if resultado is None:
         raise HTTPException(status_code=404, detail="Expediente no encontrado.")
     return ApiResponse(success=True, message="Expediente actualizado correctamente.", data=resultado)

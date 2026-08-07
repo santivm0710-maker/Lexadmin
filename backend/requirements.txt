@@ -3,5 +3,6 @@ uvicorn
 pydantic
 pydantic-settings
 python-dotenv
+python-multipart
 mysql-connector-python==9.4.0
 PyJWT==2.9.0
